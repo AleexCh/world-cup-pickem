@@ -62,14 +62,45 @@ export function useSyncPicks(userId) {
     return () => clearTimeout(delayDebounceFn);
   }, [matchPicks, knockoutPicks, userId]);
 
-  const confirmPick = (matchId) => {
-    setMatchPicks(prev => ({
-      ...prev,
+  const confirmPick = async (matchId) => {
+    if (!isFirebaseEnabled || !userId) {
+      console.warn("Firebase not enabled or user not authenticated - prediction not saved to cloud");
+      setMatchPicks(prev => ({
+        ...prev,
+        [matchId]: {
+          ...prev[matchId],
+          confirmed: true
+        }
+      }));
+      return;
+    }
+
+    // Create updated state object
+    const updatedMatchPicks = {
+      ...matchPicks,
       [matchId]: {
-        ...prev[matchId],
+        ...matchPicks[matchId],
         confirmed: true
       }
-    }));
+    };
+    
+    // Update local state immediately
+    setMatchPicks(updatedMatchPicks);
+
+    // Immediately write to Firestore
+    try {
+      const docRef = doc(db, 'predictions', userId);
+      await setDoc(docRef, {
+        userId,
+        matchPicks: updatedMatchPicks,
+        knockoutPicks,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+      
+      console.log("Prediction confirmed and saved to Firestore.");
+    } catch (error) {
+      console.error("Error saving confirmed prediction to Firestore:", error);
+    }
   };
 
   return { matchPicks, setMatchPicks, knockoutPicks, setKnockoutPicks, loading, confirmPick };
