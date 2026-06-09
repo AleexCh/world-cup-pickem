@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useSyncPicks } from './hooks/useSyncPicks';
 import AuthBanner from './components/auth/AuthBanner';
@@ -26,6 +26,9 @@ function AppContent() {
   const [actualResults, setActualResults] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
   const [activeTab, setActiveTab] = useState('matches');
+  
+  const scoreUpdateTimeoutRef = useRef(null);
+  const previousScoreRef = useRef(null);
 
   // Filter schedule into group stage and knockout stage
   const groupSchedule = schedule.filter(match => match.group && match.group.match(/^[A-L]$/));
@@ -88,35 +91,73 @@ function AppContent() {
   }, [matchPicks, teams, schedule]);
 
   useEffect(() => {
-    // Load actual results and calculate score
+    // Clear any pending score update
+    if (scoreUpdateTimeoutRef.current) {
+      clearTimeout(scoreUpdateTimeoutRef.current);
+    }
+
+    // COMPUTED FIELDS APPROACH:
+    // 1. Calculate score on-the-fly using client-side logic (real-time display)
+    // 2. Cache results to Firestore only for leaderboard sorting efficiency
+    // 3. Use debouncing and conditional writes to minimize Firestore operations
+    
     const loadActualResults = async () => {
       try {
         const results = await fetchActualResults();
         setActualResults(results);
         
         if (results && Object.keys(matchPicks).length > 0) {
+          // Computed field: calculate score on-the-fly for immediate display
           const userPicks = { matchPicks, knockoutPicks };
           const score = scoreUserPredictions(userPicks, results, schedule, teams);
           setTotalScore(score);
           
-          // Save score to Firebase if user is authenticated
+          // Firestore cache: update only for leaderboard purposes (debounced + conditional)
           if (userId) {
-            try {
-              const userDocRef = doc(db, 'users', userId);
-              await updateDoc(userDocRef, {
-                totalPoints: score,
-                scoreUpdatedAt: new Date()
-              });
-            } catch (error) {
-              console.error("Error saving score to Firebase:", error);
-            }
+            scoreUpdateTimeoutRef.current = setTimeout(async () => {
+              try {
+                const userDocRef = doc(db, 'users', userId);
+                const docSnap = await getDoc(userDocRef);
+                
+                if (docSnap.exists()) {
+                  const currentScore = docSnap.data()?.totalPoints || 0;
+                  // Only update cache if score has actually changed
+                  if (currentScore !== score) {
+                    await updateDoc(userDocRef, {
+                      totalPoints: score,
+                      scoreUpdatedAt: new Date()
+                    });
+                    console.log(`Score cached for leaderboard: ${currentScore} -> ${score}`);
+                  } else {
+                    console.log('Score unchanged, skipping Firestore cache update');
+                  }
+                } else {
+                  // Document doesn't exist yet, create it
+                  await setDoc(userDocRef, {
+                    totalPoints: score,
+                    scoreUpdatedAt: new Date()
+                  }, { merge: true });
+                  console.log('Initial score cached for leaderboard');
+                }
+              } catch (error) {
+                console.error("Error caching score to Firebase:", error);
+              }
+            }, 5000); // 5 second debounce for cache updates
           }
         }
       } catch (error) {
         console.error("Error loading actual results:", error);
       }
     };
+    
     loadActualResults();
+
+    // Cleanup function to clear timeout on unmount or dependency change
+    return () => {
+      if (scoreUpdateTimeoutRef.current) {
+        clearTimeout(scoreUpdateTimeoutRef.current);
+      }
+    };
   }, [matchPicks, knockoutPicks, schedule, teams, userId]);
 
   const handleScoreChange = (matchId, field, value) => {
