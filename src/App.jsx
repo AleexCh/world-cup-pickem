@@ -46,7 +46,7 @@ function AppContent() {
 
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
   const isAdmin = user?.email?.toLowerCase() === adminEmail?.toLowerCase();
-  const allGroupMatchesCompleted = allGroupMatchesScored(actualResults, schedule);
+  const allGroupMatchesCompleted = actualResults && allGroupMatchesScored(actualResults, schedule);
 
   useEffect(() => {
     // Load static data
