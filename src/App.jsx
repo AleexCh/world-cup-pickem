@@ -9,7 +9,7 @@ import Leaderboard from './components/dashboard/Leaderboard';
 import PlayerScoreBadge from './components/dashboard/PlayerScoreBadge';
 import ScrollToTop from './components/common/ScrollToTop';
 import AdminPanel from './components/admin/AdminPanel';
-import { calculateStandings, determineAdvancingTeams } from './utils/tournamentLogic';
+import { calculateStandings, determineAdvancingTeams, allGroupMatchesScored } from './utils/tournamentLogic';
 import { scoreUserPredictions, fetchActualResults } from './utils/scoringEngine';
 import { db } from './services/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
@@ -46,6 +46,7 @@ function AppContent() {
 
   const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
   const isAdmin = user?.email?.toLowerCase() === adminEmail?.toLowerCase();
+  const allGroupMatchesCompleted = allGroupMatchesScored(actualResults, schedule);
 
   useEffect(() => {
     // Load static data
@@ -225,16 +226,18 @@ function AppContent() {
             >
               Knockout Matches
             </button>
-            <button
-              onClick={() => setActiveTab('knockout-bracket')}
-              className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                activeTab === 'knockout-bracket'
-                  ? 'bg-amber-500 text-zinc-950'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-              }`}
-            >
-              Knockout Bracket
-            </button>
+            {(allGroupMatchesCompleted || isAdmin) && (
+              <button
+                onClick={() => setActiveTab('knockout-bracket')}
+                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                  activeTab === 'knockout-bracket'
+                    ? 'bg-amber-500 text-zinc-950'
+                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                }`}
+              >
+                Knockout Bracket
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('leaderboard')}
               className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
@@ -304,7 +307,7 @@ function AppContent() {
           </div>
         )}
 
-        {activeTab === 'knockout-bracket' && (
+        {activeTab === 'knockout-bracket' && (allGroupMatchesCompleted || isAdmin) && (
           <KnockoutBracket
             knockoutPicks={knockoutPicks}
             setKnockoutPicks={setKnockoutPicks}
