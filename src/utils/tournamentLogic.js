@@ -1,0 +1,207 @@
+/**
+ * Computes group tables (points, goal differential, goals scored) from user predictions.
+ * @param {Object} matchPicks - User's match predictions { matchId: { homeScore, awayScore } }
+ * @param {Array} schedule - Static match schedule list
+ * @param {Object} teams - Static teams mapping
+ * @returns {Object} Group standings dictionary organized by group letter
+ */
+export function calculateStandings(matchPicks, schedule, teams) {
+  const standings = {};
+
+  // Initialize standings for all teams
+  Object.values(teams).forEach((team) => {
+    if (!standings[team.group]) standings[team.group] = {};
+    standings[team.group][team.id] = {
+      teamId: team.id,
+      name: team.name,
+      played: 0,
+      won: 0,
+      drawn: 0,
+      lost: 0,
+      goalsFor: 0,
+      goalsAgainst: 0,
+      goalDifference: 0,
+      points: 0,
+    };
+  });
+
+  // Process completed pick matches
+  schedule.forEach((match) => {
+    const pick = matchPicks[match.id];
+    if (!pick || pick.homeScore === null || pick.awayScore === null || pick.homeScore === undefined || pick.awayScore === undefined) return;
+
+    const hScore = parseInt(pick.homeScore, 10);
+    const aScore = parseInt(pick.awayScore, 10);
+    const home = standings[match.group][match.homeTeam];
+    const away = standings[match.group][match.awayTeam];
+
+    if (!home || !away) return;
+
+    home.played += 1;
+    away.played += 1;
+    home.goalsFor += hScore;
+    home.goalsAgainst += aScore;
+    away.goalsFor += aScore;
+    away.goalsAgainst += hScore;
+
+    if (hScore > aScore) {
+      home.won += 1;
+      home.points += 3;
+      away.lost += 1;
+    } else if (hScore < aScore) {
+      away.won += 1;
+      away.points += 3;
+      home.lost += 1;
+    } else {
+      home.drawn += 1;
+      away.drawn += 1;
+      home.points += 1;
+      away.points += 1;
+    }
+
+    home.goalDifference = home.goalsFor - home.goalsAgainst;
+    away.goalDifference = away.goalsFor - away.goalsAgainst;
+  });
+
+  // Sort each group table dynamically based on FIFA rules
+  Object.keys(standings).forEach((group) => {
+    standings[group] = Object.values(standings[group]).sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+      return b.goalsFor - a.goalsFor; // Tiebreaker: Goals Scored
+    });
+  });
+
+  return standings;
+}
+
+/**
+ * Calculates top 2 teams from each of the 12 groups, plus the 8 best 3rd-place teams.
+ * @param {Object} standings - Output from calculateStandings
+ * @returns {Array<string>} List of 32 advancing team IDs
+ */
+export function determineAdvancingTeams(standings) {
+  const advancing = [];
+  const thirdPlaceTeams = [];
+
+  Object.keys(standings).forEach((group) => {
+    const groupTeams = standings[group];
+
+    // Top 2 automatically advance
+    if (groupTeams[0] && groupTeams[0].played > 0) advancing.push(groupTeams[0].teamId);
+    if (groupTeams[1] && groupTeams[1].played > 0) advancing.push(groupTeams[1].teamId);
+
+    // Collect 3rd place teams for separate evaluation
+    if (groupTeams[2]) {
+      thirdPlaceTeams.push(groupTeams[2]);
+    }
+  });
+
+  // Sort 3rd place overall record
+  thirdPlaceTeams.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+    return b.goalsFor - a.goalsFor;
+  });
+
+  // Take the 8 best 3rd-place finishers
+  for (let i = 0; i < Math.min(8, thirdPlaceTeams.length); i++) {
+    if (thirdPlaceTeams[i].played > 0) {
+      advancing.push(thirdPlaceTeams[i].teamId);
+    }
+  }
+
+  return advancing;
+}
+
+/**
+ * Checks if all group stage matches have been scored.
+ * @param {Object} actualResults - Actual match results from admin
+ * @param {Array} schedule - Match schedule
+ * @returns {boolean} True if all group stage matches are scored
+ */
+export function allGroupMatchesScored(actualResults, schedule) {
+  const groupSchedule = schedule.filter(match => match.group && match.group.match(/^[A-L]$/));
+  
+  for (const match of groupSchedule) {
+    const result = actualResults[match.id];
+    if (!result || result.homeScore === null || result.awayScore === null || 
+        result.homeScore === undefined || result.awayScore === undefined) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Calculates group standings from actual results (not user predictions).
+ * @param {Object} actualResults - Actual match results from admin
+ * @param {Array} schedule - Match schedule
+ * @param {Object} teams - Teams mapping
+ * @returns {Object} Group standings dictionary
+ */
+export function calculateActualStandings(actualResults, schedule, teams) {
+  return calculateStandings(actualResults, schedule, teams);
+}
+
+/**
+ * Maps advancing teams to knockout stage matches.
+ * @param {Object} standings - Group standings
+ * @param {Array} schedule - Full schedule including knockout
+ * @returns {Object} Updated knockout schedule with team IDs
+ */
+export function mapKnockoutTeams(standings, schedule) {
+  const knockoutSchedule = schedule.filter(match => match.group && !match.group.match(/^[A-L]$/));
+  const advancing = determineAdvancingTeams(standings);
+  
+  // Map advancing teams to knockout matches based on bracket structure
+  // Round of 32: 1A vs 2B, 1C vs 2D, 1E vs 2F, 1G vs 2H, 1B vs 2A, 1D vs 2C, 1F vs 2E, 1H vs 2G
+  // 1I vs 2J, 1K vs 2L, 1J vs 2I, 1L vs 2K, 3A vs 3B, 3C vs 3D, 3E vs 3F, 3G vs 3H
+  
+  const groupStandings = {};
+  Object.keys(standings).forEach(group => {
+    groupStandings[group] = standings[group];
+  });
+  
+  const teamMap = {};
+  
+  // Helper to get team by position in group
+  const getTeam = (group, position) => {
+    const groupTeams = groupStandings[group];
+    return groupTeams && groupTeams[position - 1] ? groupTeams[position - 1].teamId : 'TBD';
+  };
+  
+  // Map Round of 32 matches
+  const r32Mapping = {
+    'k1': { home: () => getTeam('A', 1), away: () => getTeam('B', 2) },
+    'k2': { home: () => getTeam('C', 1), away: () => getTeam('D', 2) },
+    'k3': { home: () => getTeam('E', 1), away: () => getTeam('F', 2) },
+    'k4': { home: () => getTeam('G', 1), away: () => getTeam('H', 2) },
+    'k5': { home: () => getTeam('B', 1), away: () => getTeam('A', 2) },
+    'k6': { home: () => getTeam('D', 1), away: () => getTeam('C', 2) },
+    'k7': { home: () => getTeam('F', 1), away: () => getTeam('E', 2) },
+    'k8': { home: () => getTeam('H', 1), away: () => getTeam('G', 2) },
+    'k9': { home: () => getTeam('I', 1), away: () => getTeam('J', 2) },
+    'k10': { home: () => getTeam('K', 1), away: () => getTeam('L', 2) },
+    'k11': { home: () => getTeam('J', 1), away: () => getTeam('I', 2) },
+    'k12': { home: () => getTeam('L', 1), away: () => getTeam('K', 2) },
+    'k13': { home: () => getTeam('A', 3), away: () => getTeam('B', 3) },
+    'k14': { home: () => getTeam('C', 3), away: () => getTeam('D', 3) },
+    'k15': { home: () => getTeam('E', 3), away: () => getTeam('F', 3) },
+    'k16': { home: () => getTeam('G', 3), away: () => getTeam('H', 3) },
+  };
+  
+  // Update knockout schedule with actual teams
+  const updatedSchedule = schedule.map(match => {
+    if (match.group && !match.group.match(/^[A-L]$/) && r32Mapping[match.id]) {
+      return {
+        ...match,
+        homeTeam: r32Mapping[match.id].home(),
+        awayTeam: r32Mapping[match.id].away()
+      };
+    }
+    return match;
+  });
+  
+  return updatedSchedule;
+}
