@@ -17,7 +17,7 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 function AppContent() {
   const { user } = useAuth();
   const userId = user?.uid || null;
-  const { matchPicks, setMatchPicks, knockoutPicks, setKnockoutPicks, loading, confirmPick } = useSyncPicks(userId);
+  const { matchPicks, setMatchPicks, knockoutPicks, setKnockoutPicks, loading, confirmPick, confirmKnockoutPicks } = useSyncPicks(userId);
   
   const [teams, setTeams] = useState({});
   const [schedule, setSchedule] = useState([]);
@@ -312,6 +312,7 @@ function AppContent() {
             knockoutPicks={knockoutPicks}
             setKnockoutPicks={setKnockoutPicks}
             teams={teams}
+            onConfirm={confirmKnockoutPicks}
           />
         )}
 

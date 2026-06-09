@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams }) {
+export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams, onConfirm }) {
+  const [showConfirmButton, setShowConfirmButton] = useState(false);
   const rounds = [
     { key: 'r32', name: 'Round of 32', slots: 16 },
     { key: 'r16', name: 'Round of 16', slots: 8 },
@@ -11,13 +12,13 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
 
   const handleSelectWinner = (currentRoundKey, nextRoundKey, teamId, index) => {
     if (!teamId) return;
-    
+
     const nextSlotIndex = Math.floor(index / 2);
-    
+
     setKnockoutPicks(prev => {
       const updatedNextRound = [...(prev[nextRoundKey] || [])];
       updatedNextRound[nextSlotIndex] = teamId;
-      
+
       let updatedChampion = prev.champion;
       if (currentRoundKey === 'final') {
         updatedChampion = teamId;
@@ -29,6 +30,8 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
         champion: updatedChampion
       };
     });
+
+    setShowConfirmButton(true);
   };
 
   return (
@@ -75,6 +78,20 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
             </span>
           </div>
         </div>
+
+        {showConfirmButton && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => {
+                onConfirm();
+                setShowConfirmButton(false);
+              }}
+              className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg transition-all"
+            >
+              Confirm Bracket Predictions
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

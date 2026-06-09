@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { db, isFirebaseEnabled } from '../services/firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -8,14 +8,18 @@ export function useSyncPicks(userId) {
     r32: [], r16: [], qf: [], sf: [], final: [], champion: ''
   });
   const [loading, setLoading] = useState(true);
-  
-  const isInitialLoad = useRef(true);
 
   // Load initial bracket picks from Firestore
   useEffect(() => {
+    // Reset state when userId changes or becomes null
+    setMatchPicks({});
+    setKnockoutPicks({
+      r32: [], r16: [], qf: [], sf: [], final: [], champion: ''
+    });
+    setLoading(true);
+
     if (!isFirebaseEnabled || !userId) {
       setLoading(false);
-      setTimeout(() => { isInitialLoad.current = false; }, 100);
       return;
     }
 
@@ -26,41 +30,21 @@ export function useSyncPicks(userId) {
         
         if (docSnap.exists()) {
           const data = docSnap.data();
-          if (data.matchPicks) setMatchPicks(data.matchPicks);
-          if (data.knockoutPicks) setKnockoutPicks(data.knockoutPicks);
+          // Only load data if it belongs to the current user
+          if (data.userId === userId) {
+            if (data.matchPicks) setMatchPicks(data.matchPicks);
+            if (data.knockoutPicks) setKnockoutPicks(data.knockoutPicks);
+          }
         }
       } catch (error) {
         console.error("Error loading user picks:", error);
       } finally {
         setLoading(false);
-        setTimeout(() => { isInitialLoad.current = false; }, 100);
       }
     }
 
     loadPicks();
   }, [userId]);
-
-  // Debounced execution for cloud persistence
-  useEffect(() => {
-    if (isInitialLoad.current || !isFirebaseEnabled || !userId) return;
-
-    const delayDebounceFn = setTimeout(async () => {
-      try {
-        const docRef = doc(db, 'predictions', userId);
-        await setDoc(docRef, {
-          userId,
-          matchPicks,
-          knockoutPicks,
-          updatedAt: serverTimestamp()
-        }, { merge: true });
-        console.log("Picks auto-saved to cloud backend.");
-      } catch (error) {
-        console.error("Auto-save failed:", error);
-      }
-    }, 500);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [matchPicks, knockoutPicks, userId]);
 
   const confirmPick = async (matchId) => {
     if (!isFirebaseEnabled || !userId) {
@@ -87,21 +71,41 @@ export function useSyncPicks(userId) {
     // Update local state immediately
     setMatchPicks(updatedMatchPicks);
 
-    // Immediately write to Firestore
+    // Immediately write to Firestore (only matchPicks, knockoutPicks auto-save separately)
     try {
       const docRef = doc(db, 'predictions', userId);
       await setDoc(docRef, {
         userId,
         matchPicks: updatedMatchPicks,
-        knockoutPicks,
         updatedAt: serverTimestamp()
       }, { merge: true });
-      
+
       console.log("Prediction confirmed and saved to Firestore.");
     } catch (error) {
       console.error("Error saving confirmed prediction to Firestore:", error);
     }
   };
 
-  return { matchPicks, setMatchPicks, knockoutPicks, setKnockoutPicks, loading, confirmPick };
+  const confirmKnockoutPicks = async () => {
+    if (!isFirebaseEnabled || !userId) {
+      console.warn("Firebase not enabled or user not authenticated - knockout picks not saved to cloud");
+      return;
+    }
+
+    // Immediately write to Firestore
+    try {
+      const docRef = doc(db, 'predictions', userId);
+      await setDoc(docRef, {
+        userId,
+        knockoutPicks,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      console.log("Knockout picks confirmed and saved to Firestore.");
+    } catch (error) {
+      console.error("Error saving confirmed knockout picks to Firestore:", error);
+    }
+  };
+
+  return { matchPicks, setMatchPicks, knockoutPicks, setKnockoutPicks, loading, confirmPick, confirmKnockoutPicks };
 }
