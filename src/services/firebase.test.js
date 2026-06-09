@@ -1,12 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { auth, db, googleProvider, isFirebaseEnabled } from './firebase.js';
 
-// Helper function to check if we're using mock/test values
-const isMockConfig = () => {
-  return import.meta.env.VITE_FIREBASE_API_KEY === 'test-api-key' ||
-         import.meta.env.VITE_FIREBASE_PROJECT_ID === 'test-project';
-};
-
 describe('Firebase Configuration', () => {
   describe('Environment Variables', () => {
     it('should have all required Firebase environment variables', () => {
@@ -27,19 +21,21 @@ describe('Firebase Configuration', () => {
 
     it('should have valid Firebase API key format', () => {
       const apiKey = import.meta.env.VITE_FIREBASE_API_KEY;
-      if (!isMockConfig()) {
-        expect(apiKey).toMatch(/^AIza[A-Za-z0-9_-]{35,39}$/);
+      // In test environment, we accept test-api-key, otherwise require real format
+      if (apiKey === 'test-api-key') {
+        expect(apiKey).toBe('test-api-key');
       } else {
-        expect(apiKey).toBeTruthy();
+        expect(apiKey).toMatch(/^AIza[A-Za-z0-9_-]{35,39}$/);
       }
     });
 
     it('should have valid Firebase auth domain format', () => {
       const authDomain = import.meta.env.VITE_FIREBASE_AUTH_DOMAIN;
-      if (!isMockConfig()) {
-        expect(authDomain).toMatch(/^[a-z0-9-]+\.firebaseapp\.com$/);
+      // In test environment, we accept test-project.firebaseapp.com
+      if (authDomain === 'test-project.firebaseapp.com') {
+        expect(authDomain).toBe('test-project.firebaseapp.com');
       } else {
-        expect(authDomain).toBeTruthy();
+        expect(authDomain).toMatch(/^[a-z0-9-]+\.firebaseapp\.com$/);
       }
     });
 
@@ -51,10 +47,11 @@ describe('Firebase Configuration', () => {
 
     it('should have valid Firebase app ID format', () => {
       const appId = import.meta.env.VITE_FIREBASE_APP_ID;
-      if (!isMockConfig()) {
-        expect(appId).toMatch(/^\d+:\d+:[a-z0-9:]+$/);
+      // In test environment, we accept the mock format
+      if (appId === '1:123456789:web:abcdef') {
+        expect(appId).toBe('1:123456789:web:abcdef');
       } else {
-        expect(appId).toBeTruthy();
+        expect(appId).toMatch(/^\d+:\d+:[a-z0-9:]+$/);
       }
     });
   });
