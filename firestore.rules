@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() { return request.auth != null; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function isAdmin() {
+      return isSignedIn() &&
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // Allow public read access to actual results (for scoring)
+    // Admin can write to update results
+    match /actualResults/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Allow public read access to knockout teams (for bracket display)
+    // Admin can write to update knockout teams
+    match /knockoutTeams/{document=**} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Users can read/write their own predictions
+    match /predictions/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Users can read/write their own profile data
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // All authenticated users can read user profiles (for leaderboard)
+    match /users/{userId} {
+      allow read: if isSignedIn();
+    }
+  }
+}
