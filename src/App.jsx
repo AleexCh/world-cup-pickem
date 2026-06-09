@@ -47,8 +47,8 @@ function AppContent() {
   useEffect(() => {
     // Load static data
     Promise.all([
-      fetch('/data/teams.json').then(res => res.json()),
-      fetch('/data/schedule.json').then(res => res.json())
+      fetch(`${import.meta.env.BASE_URL}data/teams.json`).then(res => res.json()),
+      fetch(`${import.meta.env.BASE_URL}data/schedule.json`).then(res => res.json())
     ]).then(([teamsData, scheduleData]) => {
       setTeams(teamsData);
       // Sort matches by date and time
@@ -58,6 +58,8 @@ function AppContent() {
         return dateA - dateB;
       });
       setSchedule(sortedSchedule);
+    }).catch(error => {
+      console.error("Error loading static data:", error);
     });
   }, []);
 
