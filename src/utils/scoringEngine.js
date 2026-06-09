@@ -129,7 +129,20 @@ export function scoreUserPredictions(userPicks, actualResults, schedule, teams) 
       const userGroup = userStandings[group];
       const actualGroup = actualStandings[group];
 
-      if (userGroup && actualGroup && userGroup.length === actualGroup.length) {
+      // Check if all matches in this group have been played
+      const groupMatches = schedule.filter(match => match.group === group);
+      const groupMatchesPlayed = groupMatches.filter(match =>
+        actualMatches[match.id] &&
+        actualMatches[match.id].homeScore !== null &&
+        actualMatches[match.id].awayScore !== null
+      );
+      const allGroupMatchesPlayed = groupMatchesPlayed.length === groupMatches.length;
+
+      // Only award perfect group bonus if:
+      // 1. Group has at least one match
+      // 2. All matches in the group have been played
+      // 3. User and actual standings match perfectly
+      if (userGroup && actualGroup && userGroup.length === actualGroup.length && allGroupMatchesPlayed && groupMatches.length > 0) {
         let perfectMatch = true;
         for (let i = 0; i < userGroup.length; i++) {
           if (userGroup[i].teamId !== actualGroup[i].teamId) {
@@ -148,16 +161,23 @@ export function scoreUserPredictions(userPicks, actualResults, schedule, teams) 
   const userKO = userPicks.knockoutPicks || {};
   const actualKO = actualResults.knockoutPicks || {};
 
-  const knockoutRounds = ['r32', 'r16', 'qf', 'sf', 'final'];
+  // Iterate rounds in reverse order (final to r32) to award points for furthest achievement
+  const knockoutRounds = ['final', 'sf', 'qf', 'r16', 'r32'];
   const roundWeights = { r32: 10, r16: 20, qf: 30, sf: 45, final: 60 };
+
+  // Track which teams have already been awarded points to avoid duplicate scoring
+  const awardedTeams = new Set();
 
   knockoutRounds.forEach((round) => {
     const userTeams = userKO[round] || [];
     const actualTeams = actualKO[round] || [];
 
     userTeams.forEach((teamId) => {
-      if (actualTeams.includes(teamId)) {
+      // Only award points if team hasn't been awarded yet
+      // and if the team actually advanced to this round
+      if (!awardedTeams.has(teamId) && actualTeams.includes(teamId)) {
         points += roundWeights[round];
+        awardedTeams.add(teamId);
       }
     });
   });
