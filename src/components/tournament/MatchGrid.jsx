@@ -49,20 +49,20 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
               </span>
             </div>
 
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 sm:gap-3 w-[45%]">
+            <div className="flex items-center justify-between gap-3 sm:gap-4">
+              <div className="flex items-center gap-2 sm:gap-3 w-[42%]">
                 <span className="text-xl sm:text-2xl">{home?.flag}</span>
                 <span className="text-xs sm:text-sm font-medium text-zinc-100">{home?.name}</span>
               </div>
 
-              <div className="flex items-center gap-1.5 justify-center w-[10%]">
+              <div className="flex items-center gap-2 justify-center w-[16%]">
                 {matchCompleted ? (
-                  <div className="flex items-center gap-1">
-                    <span className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center border rounded-lg font-bold ${pick.homeScore == actualMatch.homeScore && pick.awayScore == actualMatch.awayScore ? 'bg-emerald-600/30 border-emerald-500 text-emerald-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
+                  <div className="flex items-center gap-2">
+                    <span className={`w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border rounded-lg font-bold ${pick.homeScore == actualMatch.homeScore && pick.awayScore == actualMatch.awayScore ? 'bg-emerald-600/30 border-emerald-500 text-emerald-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
                       {pick.homeScore}
                     </span>
                     <span className="text-zinc-500 font-bold">:</span>
-                    <span className={`w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center border rounded-lg font-bold ${pick.homeScore == actualMatch.homeScore && pick.awayScore == actualMatch.awayScore ? 'bg-emerald-600/30 border-emerald-500 text-emerald-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
+                    <span className={`w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border rounded-lg font-bold ${pick.homeScore == actualMatch.homeScore && pick.awayScore == actualMatch.awayScore ? 'bg-emerald-600/30 border-emerald-500 text-emerald-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
                       {pick.awayScore}
                     </span>
                   </div>
@@ -75,7 +75,7 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
                       value={pick.homeScore ?? ''}
                       onChange={(e) => onScoreChange(match.id, 'homeScore', e.target.value)}
                       disabled={locked || knockoutLocked || pick.confirmed}
-                      className={`w-9 h-9 sm:w-10 sm:h-10 text-center border rounded-lg text-white font-bold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${(locked || knockoutLocked || pick.confirmed) ? 'bg-zinc-800/50 border-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-zinc-800 border-zinc-700 focus:ring-2 focus:ring-amber-500'}`}
+                      className={`w-12 h-12 sm:w-10 sm:h-10 text-center border rounded-lg text-white font-bold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${(locked || knockoutLocked || pick.confirmed) ? 'bg-zinc-800/50 border-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-zinc-800 border-zinc-700 focus:ring-2 focus:ring-amber-500'}`}
                     />
                     <span className="text-zinc-500 font-bold">:</span>
                     <input
@@ -85,13 +85,13 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
                       value={pick.awayScore ?? ''}
                       onChange={(e) => onScoreChange(match.id, 'awayScore', e.target.value)}
                       disabled={locked || knockoutLocked || pick.confirmed}
-                      className={`w-9 h-9 sm:w-10 sm:h-10 text-center border rounded-lg text-white font-bold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${(locked || knockoutLocked || pick.confirmed) ? 'bg-zinc-800/50 border-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-zinc-800 border-zinc-700 focus:ring-2 focus:ring-amber-500'}`}
+                      className={`w-12 h-12 sm:w-10 sm:h-10 text-center border rounded-lg text-white font-bold focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${(locked || knockoutLocked || pick.confirmed) ? 'bg-zinc-800/50 border-zinc-700 text-zinc-500 cursor-not-allowed' : 'bg-zinc-800 border-zinc-700 focus:ring-2 focus:ring-amber-500'}`}
                     />
                   </>
                 )}
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3 justify-end w-[45%] text-right">
+              <div className="flex items-center gap-2 sm:gap-3 justify-end w-[42%] text-right">
                 <span className="text-xs sm:text-sm font-medium text-zinc-100">{away?.name}</span>
                 <span className="text-xl sm:text-2xl">{away?.flag}</span>
               </div>
