@@ -13,7 +13,11 @@ export default function AuthBanner() {
       <div className="flex items-center gap-3">
         {user ? (
           <>
-            <img src={user.photoURL} alt={user.displayName} className="w-10 h-10 rounded-full border border-emerald-400" />
+            <img
+              src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`}
+              alt={user.displayName}
+              className="w-10 h-10 rounded-full border border-emerald-400"
+            />
             <div>
               <p className="font-semibold">Logged in as {user.displayName}</p>
               <p className="text-xs opacity-75">Your picks are synced globally across all devices.</p>

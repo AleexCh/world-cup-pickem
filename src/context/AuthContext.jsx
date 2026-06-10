@@ -28,17 +28,15 @@ export function AuthProvider({ children }) {
             await setDoc(userRef, {
               uid: firebaseUser.uid,
               displayName: firebaseUser.displayName,
-              photoURL: firebaseUser.photoURL,
               totalPoints: 0,
               createdAt: serverTimestamp(),
               updatedAt: serverTimestamp()
             });
           } else {
-            // Existing user - update photoURL and updatedAt, preserve displayName if custom
+            // Existing user - update updatedAt, preserve displayName if custom
             const existingData = docSnap.data();
             await updateDoc(userRef, {
               displayName: existingData.displayName || firebaseUser.displayName,
-              photoURL: firebaseUser.photoURL,
               updatedAt: serverTimestamp()
             });
           }

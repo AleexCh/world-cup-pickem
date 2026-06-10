@@ -27,12 +27,29 @@ export function useSyncPicks(userId) {
       try {
         const docRef = doc(db, 'predictions', userId);
         const docSnap = await getDoc(docRef);
-        
+
         if (docSnap.exists()) {
           const data = docSnap.data();
           // Only load data if it belongs to the current user
           if (data.userId === userId) {
-            if (data.matchPicks) setMatchPicks(data.matchPicks);
+            // Handle both nested matchPicks structure and flattened structure (for backward compatibility)
+            if (data.matchPicks) {
+              setMatchPicks(data.matchPicks);
+            } else {
+              // Handle flattened structure - extract match-like keys
+              const flattenedPicks = {};
+              Object.keys(data).forEach(key => {
+                // Skip non-match keys
+                if (key !== 'userId' && key !== 'updatedAt' && key !== 'knockoutPicks' &&
+                    typeof data[key] === 'object' && data[key] !== null &&
+                    (data[key].homeScore !== undefined || data[key].awayScore !== undefined)) {
+                  flattenedPicks[key] = data[key];
+                }
+              });
+              if (Object.keys(flattenedPicks).length > 0) {
+                setMatchPicks(flattenedPicks);
+              }
+            }
             if (data.knockoutPicks) setKnockoutPicks(data.knockoutPicks);
           }
         }

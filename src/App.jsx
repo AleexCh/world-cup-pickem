@@ -86,6 +86,19 @@ function AppContent() {
     loadKnockoutTeams();
   }, []);
 
+  // Load actual results once on mount (to avoid repeated Firestore calls)
+  useEffect(() => {
+    const loadActualResults = async () => {
+      try {
+        const results = await fetchActualResults();
+        setActualResults(results);
+      } catch (error) {
+        console.error("Error loading actual results:", error);
+      }
+    };
+    loadActualResults();
+  }, []);
+
   useEffect(() => {
     if (Object.keys(teams).length > 0 && schedule.length > 0) {
       const calculatedStandings = calculateStandings(matchPicks, schedule, teams);
@@ -113,57 +126,46 @@ function AppContent() {
     // 1. Calculate score on-the-fly using client-side logic (real-time display)
     // 2. Cache results to Firestore only for leaderboard sorting efficiency
     // 3. Use debouncing and conditional writes to minimize Firestore operations
-    
-    const loadActualResults = async () => {
-      try {
-        const results = await fetchActualResults();
-        setActualResults(results);
-        
-        if (results && Object.keys(matchPicks).length > 0) {
-          // Computed field: calculate score on-the-fly for immediate display
-          const userPicks = { matchPicks, knockoutPicks };
-          const score = scoreUserPredictions(userPicks, results, schedule, teams);
-          setTotalScore(score);
-          
-          // Firestore cache: update only for leaderboard purposes (debounced + conditional)
-          if (userId) {
-            scoreUpdateTimeoutRef.current = setTimeout(async () => {
-              try {
-                const userDocRef = doc(db, 'users', userId);
-                const docSnap = await getDoc(userDocRef);
-                
-                if (docSnap.exists()) {
-                  const currentScore = docSnap.data()?.totalPoints || 0;
-                  // Only update cache if score has actually changed
-                  if (currentScore !== score) {
-                    await updateDoc(userDocRef, {
-                      totalPoints: score,
-                      scoreUpdatedAt: new Date()
-                    });
-                    console.log(`Score cached for leaderboard: ${currentScore} -> ${score}`);
-                  } else {
-                    console.log('Score unchanged, skipping Firestore cache update');
-                  }
-                } else {
-                  // Document doesn't exist yet, create it
-                  await setDoc(userDocRef, {
-                    totalPoints: score,
-                    scoreUpdatedAt: new Date()
-                  }, { merge: true });
-                  console.log('Initial score cached for leaderboard');
-                }
-              } catch (error) {
-                console.error("Error caching score to Firebase:", error);
+
+    if (actualResults && Object.keys(matchPicks).length > 0) {
+      // Computed field: calculate score on-the-fly for immediate display
+      const userPicks = { matchPicks, knockoutPicks };
+      const score = scoreUserPredictions(userPicks, actualResults, schedule, teams);
+      setTotalScore(score);
+
+      // Firestore cache: update only for leaderboard purposes (debounced + conditional)
+      if (userId) {
+        scoreUpdateTimeoutRef.current = setTimeout(async () => {
+          try {
+            const userDocRef = doc(db, 'users', userId);
+            const docSnap = await getDoc(userDocRef);
+
+            if (docSnap.exists()) {
+              const currentScore = docSnap.data()?.totalPoints || 0;
+              // Only update cache if score has actually changed
+              if (currentScore !== score) {
+                await updateDoc(userDocRef, {
+                  totalPoints: score,
+                  scoreUpdatedAt: new Date()
+                });
+                console.log(`Score cached for leaderboard: ${currentScore} -> ${score}`);
+              } else {
+                console.log('Score unchanged, skipping Firestore cache update');
               }
-            }, 5000); // 5 second debounce for cache updates
+            } else {
+              // Document doesn't exist yet, create it
+              await setDoc(userDocRef, {
+                totalPoints: score,
+                scoreUpdatedAt: new Date()
+              }, { merge: true });
+              console.log('Initial score cached for leaderboard');
+            }
+          } catch (error) {
+            console.error("Error caching score to Firebase:", error);
           }
-        }
-      } catch (error) {
-        console.error("Error loading actual results:", error);
+        }, 5000); // 5 second debounce for cache updates
       }
-    };
-    
-    loadActualResults();
+    }
 
     // Cleanup function to clear timeout on unmount or dependency change
     return () => {
@@ -171,7 +173,7 @@ function AppContent() {
         clearTimeout(scoreUpdateTimeoutRef.current);
       }
     };
-  }, [matchPicks, knockoutPicks, schedule, teams, userId]);
+  }, [matchPicks, knockoutPicks, schedule, teams, userId, actualResults]);
 
   const handleScoreChange = (matchId, field, value) => {
     setMatchPicks(prev => ({

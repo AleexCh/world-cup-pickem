@@ -73,7 +73,11 @@ export default function Leaderboard() {
                   <span className={`w-5 sm:w-6 text-center text-[10px] sm:text-xs ${medalColor}`}>
                     {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
                   </span>
-                  <img src={player.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${player.uid}`} alt={player.displayName} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-800 border border-zinc-700/50" />
+                  <img
+                    src={`https://api.dicebear.com/7.x/bottts/svg?seed=${player.uid}`}
+                    alt={player.displayName}
+                    className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-zinc-800 border border-zinc-700/50"
+                  />
                   <span className="text-xs sm:text-sm font-semibold text-zinc-200 truncate">{player.displayName || "Anonymous Scout"}</span>
                 </div>
                 <div className="text-right">

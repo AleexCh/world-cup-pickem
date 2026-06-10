@@ -106,9 +106,9 @@ export default function Profile() {
 
       <div className="p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-6">
-          <img 
-            src={user.photoURL || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`} 
-            alt={displayName} 
+          <img
+            src={`https://api.dicebear.com/7.x/bottts/svg?seed=${user.uid}`}
+            alt={displayName}
             className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-zinc-800 border-2 border-zinc-700"
           />
           <div className="text-center sm:text-left">
