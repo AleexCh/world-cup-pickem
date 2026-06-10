@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  base: '/world-cup-pickem/', // Update this to '/your-repo-name/' for GitHub Pages
+  base: import.meta.env.DEV ? '/' : '/world-cup-pickem/', // Use '/' for dev, '/world-cup-pickem/' for production
   plugins: [react()],
   test: {
     environment: 'jsdom',

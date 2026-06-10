@@ -17,7 +17,13 @@ export default function Leaderboard() {
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const players = [];
       snapshot.forEach((doc) => {
-        players.push({ id: doc.id, ...doc.data() });
+        const userData = { id: doc.id, ...doc.data() };
+        
+        // Filter out admin users from leaderboard using isAdmin field
+        if (userData.isAdmin) {
+          return; // Skip admin users
+        }
+        players.push(userData);
       });
       setLeaderboard(players);
       setLoading(false);
