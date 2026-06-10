@@ -11,7 +11,7 @@ import PlayerScoreBadge from './components/dashboard/PlayerScoreBadge';
 import ScrollToTop from './components/common/ScrollToTop';
 import AdminPanel from './components/admin/AdminPanel';
 import { calculateStandings, determineAdvancingTeams, allGroupMatchesScored } from './utils/tournamentLogic';
-import { scoreUserPredictions, fetchActualResults } from './utils/scoringEngine';
+import { scoreUserPredictions, fetchActualResults, calculateGroupStandingPoints } from './utils/scoringEngine';
 import { db } from './services/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
@@ -24,6 +24,7 @@ function AppContent() {
   const [schedule, setSchedule] = useState([]);
   const [knockoutTeams, setKnockoutTeams] = useState({});
   const [standings, setStandings] = useState({});
+  const [groupPoints, setGroupPoints] = useState({});
   const [actualResults, setActualResults] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
   const [activeTab, setActiveTab] = useState('matches');
@@ -91,6 +92,16 @@ function AppContent() {
       setStandings(calculatedStandings);
     }
   }, [matchPicks, teams, schedule]);
+
+  useEffect(() => {
+    if (Object.keys(standings).length > 0 && schedule.length > 0 && actualResults) {
+      // Calculate actual standings for comparison
+      const actualMatches = actualResults?.matchPicks || {};
+      const actualStandings = calculateStandings(actualMatches, schedule, teams);
+      const calculatedGroupPoints = calculateGroupStandingPoints(standings, actualStandings, schedule, actualResults);
+      setGroupPoints(calculatedGroupPoints.pointsByGroup);
+    }
+  }, [standings, actualResults, schedule, teams]);
 
   useEffect(() => {
     // Clear any pending score update
@@ -304,6 +315,7 @@ function AppContent() {
                 key={letter}
                 groupLetter={letter}
                 groupStandings={standings[letter] || []}
+                groupPoints={groupPoints[letter] || null}
               />
             ))}
           </div>

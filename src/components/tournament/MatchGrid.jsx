@@ -33,7 +33,15 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
         const pointsEarned = matchCompleted ? calculateMatchPoints(pick, actualMatch) : 0;
 
         return (
-          <div key={match.id} className={`bg-zinc-900/80 border p-3 sm:p-4 rounded-xl flex flex-col justify-between transition-all ${locked || knockoutLocked ? 'border-zinc-700 opacity-75' : 'border-zinc-800 hover:border-zinc-700'} ${matchCompleted ? 'border-amber-500/30' : ''}`}>
+          <div key={match.id} className={`bg-zinc-900/80 border p-3 sm:p-4 rounded-xl flex flex-col justify-between transition-all ${
+            matchCompleted 
+              ? (pointsEarned > 0 
+                  ? 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                  : 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]')
+              : (locked || knockoutLocked)
+                  ? 'border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)] opacity-80'
+                  : 'border-zinc-800 hover:border-zinc-700'
+          }`}>
             <div className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-widest font-semibold mb-2 flex justify-between">
               <span>Group {match.group}</span>
               <span className={(locked || knockoutLocked) ? 'text-amber-500' : matchCompleted ? 'text-emerald-400' : ''}>

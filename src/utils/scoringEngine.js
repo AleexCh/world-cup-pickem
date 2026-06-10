@@ -59,6 +59,73 @@ export function formatMatchTime(match) {
 }
 
 /**
+ * Calculates points earned for correct group standing positions
+ * @param {Object} userStandings - User's predicted standings by group
+ * @param {Object} actualStandings - Actual standings by group
+ * @param {Array} schedule - Match schedule
+ * @param {Object} actualResults - Actual match results
+ * @returns {Object} Points per position per group, and total group standing points
+ */
+export function calculateGroupStandingPoints(userStandings, actualStandings, schedule, actualResults) {
+  const pointsByGroup = {};
+  let totalPoints = 0;
+
+  // Position point values
+  const positionPoints = { 1: 10, 2: 8, 3: 6, 4: 4 };
+
+  Object.keys(userStandings).forEach((group) => {
+    const userGroup = userStandings[group];
+    const actualGroup = actualStandings[group];
+    const groupPoints = { positions: [], total: 0 };
+
+    // Check if all matches in this group have been played
+    const groupMatches = schedule.filter(match => match.group === group);
+    const actualMatches = actualResults?.matchPicks || {};
+    const groupMatchesPlayed = groupMatches.filter(match =>
+      actualMatches[match.id] &&
+      actualMatches[match.id].homeScore !== null &&
+      actualMatches[match.id].awayScore !== null
+    );
+    const allGroupMatchesPlayed = groupMatchesPlayed.length === groupMatches.length;
+
+    if (userGroup && actualGroup && allGroupMatchesPlayed && groupMatches.length > 0) {
+      userGroup.forEach((userTeam, position) => {
+        const actualTeam = actualGroup[position];
+        const isCorrect = actualTeam && userTeam.teamId === actualTeam.teamId;
+        const points = isCorrect ? (positionPoints[position + 1] || 0) : 0;
+
+        groupPoints.positions.push({
+          position: position + 1,
+          teamId: userTeam.teamId,
+          teamName: userTeam.name,
+          isCorrect,
+          points
+        });
+
+        groupPoints.total += points;
+      });
+
+      totalPoints += groupPoints.total;
+    } else {
+      // If group not completed, show positions without points
+      userGroup.forEach((userTeam, position) => {
+        groupPoints.positions.push({
+          position: position + 1,
+          teamId: userTeam.teamId,
+          teamName: userTeam.name,
+          isCorrect: false,
+          points: 0
+        });
+      });
+    }
+
+    pointsByGroup[group] = groupPoints;
+  });
+
+  return { pointsByGroup, totalPoints };
+}
+
+/**
  * Calculates points earned for a single match prediction
  * @param {Object} userMatch - User's prediction { homeScore, awayScore }
  * @param {Object} actualMatch - Actual result { homeScore, awayScore }
@@ -120,41 +187,12 @@ export function scoreUserPredictions(userPicks, actualResults, schedule, teams) 
     points += calculateMatchPoints(userMatch, actualMatch);
   });
 
-  // 2. Perfect Group Standing Bonus
+  // 2. Group Standing Points (per position scoring)
   if (schedule && teams) {
     const userStandings = calculateStandings(userMatches, schedule, teams);
     const actualStandings = calculateStandings(actualMatches, schedule, teams);
-
-    Object.keys(userStandings).forEach((group) => {
-      const userGroup = userStandings[group];
-      const actualGroup = actualStandings[group];
-
-      // Check if all matches in this group have been played
-      const groupMatches = schedule.filter(match => match.group === group);
-      const groupMatchesPlayed = groupMatches.filter(match =>
-        actualMatches[match.id] &&
-        actualMatches[match.id].homeScore !== null &&
-        actualMatches[match.id].awayScore !== null
-      );
-      const allGroupMatchesPlayed = groupMatchesPlayed.length === groupMatches.length;
-
-      // Only award perfect group bonus if:
-      // 1. Group has at least one match
-      // 2. All matches in the group have been played
-      // 3. User and actual standings match perfectly
-      if (userGroup && actualGroup && userGroup.length === actualGroup.length && allGroupMatchesPlayed && groupMatches.length > 0) {
-        let perfectMatch = true;
-        for (let i = 0; i < userGroup.length; i++) {
-          if (userGroup[i].teamId !== actualGroup[i].teamId) {
-            perfectMatch = false;
-            break;
-          }
-        }
-        if (perfectMatch) {
-          points += 30; // Bonus for perfect group standing prediction
-        }
-      }
-    });
+    const groupStandingPoints = calculateGroupStandingPoints(userStandings, actualStandings, schedule, actualResults);
+    points += groupStandingPoints.totalPoints;
   }
 
   // 3. Knockout Stage Qualification Scoring
