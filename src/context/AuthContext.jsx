@@ -8,6 +8,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     if (!isFirebaseEnabled) {
@@ -33,9 +34,10 @@ export function AuthProvider({ children }) {
               updatedAt: serverTimestamp()
             });
           } else {
-            // Existing user - just update profile info, preserve score
+            // Existing user - update photoURL and updatedAt, preserve displayName if custom
+            const existingData = docSnap.data();
             await updateDoc(userRef, {
-              displayName: firebaseUser.displayName,
+              displayName: existingData.displayName || firebaseUser.displayName,
               photoURL: firebaseUser.photoURL,
               updatedAt: serverTimestamp()
             });
@@ -50,6 +52,7 @@ export function AuthProvider({ children }) {
         setUser(null);
       }
       setLoading(false);
+      setAuthLoading(false);
     });
 
     return () => unsubscribe();
@@ -60,10 +63,12 @@ export function AuthProvider({ children }) {
       console.warn("Firebase is not enabled. Cannot sign in.");
       return;
     }
+    setAuthLoading(true);
     try {
       await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error("Authentication Error:", error);
+      setAuthLoading(false);
     }
   };
 
@@ -72,15 +77,19 @@ export function AuthProvider({ children }) {
       console.warn("Firebase is not enabled. Cannot sign out.");
       return;
     }
+    setAuthLoading(true);
     try {
+      // Add a small delay to show the loading animation
+      await new Promise(resolve => setTimeout(resolve, 1500));
       await signOut(auth);
     } catch (error) {
       console.error("Logout Error:", error);
+      setAuthLoading(false);
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, loginWithGoogle, logout, isFirebaseEnabled }}>
+    <AuthContext.Provider value={{ user, loading, authLoading, loginWithGoogle, logout, isFirebaseEnabled }}>
       {!loading && children}
     </AuthContext.Provider>
   );
