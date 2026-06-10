@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useSyncPicks } from './hooks/useSyncPicks';
 import AuthBanner from './components/auth/AuthBanner';
+import Profile from './components/auth/Profile';
 import MatchGrid from './components/tournament/MatchGrid';
 import GroupTable from './components/tournament/GroupTable';
 import KnockoutBracket from './components/knockout/KnockoutBracket';
@@ -248,6 +249,18 @@ function AppContent() {
             >
               Leaderboard
             </button>
+            {user && (
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                  activeTab === 'profile'
+                    ? 'bg-emerald-500 text-zinc-950'
+                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                }`}
+              >
+                Profile
+              </button>
+            )}
             {isAdmin && (
               <button
                 onClick={() => setActiveTab('admin')}
@@ -318,6 +331,10 @@ function AppContent() {
 
         {activeTab === 'leaderboard' && (
           <Leaderboard />
+        )}
+
+        {activeTab === 'profile' && user && (
+          <Profile />
         )}
 
         {activeTab === 'admin' && isAdmin && (
