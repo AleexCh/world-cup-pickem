@@ -1,8 +1,8 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-export default defineConfig({
-  base: import.meta.env.DEV ? '/' : '/world-cup-pickem/', // Use '/' for dev, '/world-cup-pickem/' for production
+export default defineConfig(({ mode }) => ({
+  base: mode === 'development' ? '/' : '/world-cup-pickem/', // Use '/' for dev, '/world-cup-pickem/' for production
   plugins: [react()],
   test: {
     environment: 'jsdom',
