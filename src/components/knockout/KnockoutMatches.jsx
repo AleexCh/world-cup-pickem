@@ -8,6 +8,21 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
     return new Date() < knockoutLockDate;
   };
 
+  // Sort matches by date and time
+  const sortedSchedule = React.useMemo(() => {
+    if (!schedule) return [];
+    return [...schedule].sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.time || '00:00:00Z'}`);
+      const dateB = new Date(`${b.date}T${b.time || '00:00:00Z'}`);
+      return dateA - dateB;
+    });
+  }, [schedule]);
+
+  // Format date for display (same as group matches)
+  const formatMatchDate = (match) => {
+    return formatMatchTime(match);
+  };
+
   if (!schedule || schedule.length === 0) {
     return (
       <div className="text-center py-12">
@@ -24,7 +39,7 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
         </p>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:gap-4">
-      {schedule.map((match) => {
+      {sortedSchedule.map((match) => {
         const home = teams[match.homeTeam];
         const away = teams[match.awayTeam];
         const pick = matchPicks[match.id] || { homeScore: '', awayScore: '', confirmed: false };
@@ -48,7 +63,10 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
                   : 'border-zinc-800 hover:border-zinc-700'
           }`}>
             <div className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-widest font-semibold mb-2 flex justify-between">
-              <span>{match.group || 'Knockout'}</span>
+              <div className="flex flex-col">
+                <span>{match.group || 'Knockout'}</span>
+                <span className="text-zinc-500 normal-case">{formatMatchDate(match)}</span>
+              </div>
               <span className={(locked || knockoutLocked) ? 'text-amber-500' : matchCompleted ? 'text-emerald-400' : ''}>
                 {matchCompleted ? 'Final' : locked ? 'Locked' : knockoutLocked ? 'Locked (Until June 28)' : matchTime}
               </span>

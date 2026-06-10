@@ -652,8 +652,8 @@
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-06-29",
-    "time": "17:00:00Z",
+    "date": "2026-06-28",
+    "time": "19:00:00Z",
     "stadium": "SoFi Stadium"
   },
   {
@@ -662,17 +662,17 @@
     "homeTeam": "TBD",
     "awayTeam": "TBD",
     "date": "2026-06-29",
-    "time": "20:00:00Z",
-    "stadium": "MetLife Stadium"
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
   },
   {
     "id": "k3",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-06-30",
-    "time": "17:00:00Z",
-    "stadium": "AT&T Stadium"
+    "date": "2026-06-29",
+    "time": "20:30:00Z",
+    "stadium": "Gillette Stadium"
   },
   {
     "id": "k4",
@@ -680,52 +680,52 @@
     "homeTeam": "TBD",
     "awayTeam": "TBD",
     "date": "2026-06-30",
-    "time": "20:00:00Z",
-    "stadium": "Arrowhead Stadium"
+    "time": "01:00:00Z",
+    "stadium": "Estadio BBVA"
   },
   {
     "id": "k5",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-01",
+    "date": "2026-06-30",
     "time": "17:00:00Z",
-    "stadium": "Levi's Stadium"
+    "stadium": "AT&T Stadium"
   },
   {
     "id": "k6",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-01",
-    "time": "20:00:00Z",
-    "stadium": "BC Place"
+    "date": "2026-06-30",
+    "time": "21:00:00Z",
+    "stadium": "MetLife Stadium"
   },
   {
     "id": "k7",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-02",
-    "time": "17:00:00Z",
-    "stadium": "NRG Stadium"
+    "date": "2026-07-01",
+    "time": "01:00:00Z",
+    "stadium": "Estadio Azteca"
   },
   {
     "id": "k8",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-02",
-    "time": "20:00:00Z",
-    "stadium": "Estadio Azteca"
+    "date": "2026-07-01",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
   },
   {
     "id": "k9",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-03",
-    "time": "17:00:00Z",
+    "date": "2026-07-01",
+    "time": "20:00:00Z",
     "stadium": "Lumen Field"
   },
   {
@@ -733,152 +733,152 @@
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-03",
-    "time": "20:00:00Z",
-    "stadium": "Hard Rock Stadium"
+    "date": "2026-07-02",
+    "time": "00:00:00Z",
+    "stadium": "Levi's Stadium"
   },
   {
     "id": "k11",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-04",
-    "time": "17:00:00Z",
-    "stadium": "Mercedes-Benz Stadium"
+    "date": "2026-07-02",
+    "time": "19:00:00Z",
+    "stadium": "SoFi Stadium"
   },
   {
     "id": "k12",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-04",
-    "time": "20:00:00Z",
-    "stadium": "Lincoln Financial Field"
+    "date": "2026-07-02",
+    "time": "23:00:00Z",
+    "stadium": "BMO Field"
   },
   {
     "id": "k13",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-05",
-    "time": "17:00:00Z",
-    "stadium": "Gillette Stadium"
+    "date": "2026-07-03",
+    "time": "03:00:00Z",
+    "stadium": "BC Place"
   },
   {
     "id": "k14",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-05",
-    "time": "20:00:00Z",
-    "stadium": "BMO Field"
+    "date": "2026-07-03",
+    "time": "18:00:00Z",
+    "stadium": "AT&T Stadium"
   },
   {
     "id": "k15",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-06",
-    "time": "17:00:00Z",
-    "stadium": "Estadio Akron"
+    "date": "2026-07-03",
+    "time": "22:00:00Z",
+    "stadium": "Hard Rock Stadium"
   },
   {
     "id": "k16",
     "group": "R32",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-06",
-    "time": "20:00:00Z",
-    "stadium": "Estadio BBVA"
+    "date": "2026-07-03",
+    "time": "01:30:00Z",
+    "stadium": "Arrowhead Stadium"
   },
   {
     "id": "k17",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-09",
+    "date": "2026-07-04",
     "time": "17:00:00Z",
-    "stadium": "MetLife Stadium"
+    "stadium": "NRG Stadium"
   },
   {
     "id": "k18",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-09",
-    "time": "20:00:00Z",
-    "stadium": "SoFi Stadium"
+    "date": "2026-07-04",
+    "time": "21:00:00Z",
+    "stadium": "Lincoln Financial Field"
   },
   {
     "id": "k19",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-10",
-    "time": "17:00:00Z",
-    "stadium": "AT&T Stadium"
+    "date": "2026-07-05",
+    "time": "20:00:00Z",
+    "stadium": "MetLife Stadium"
   },
   {
     "id": "k20",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-10",
-    "time": "20:00:00Z",
-    "stadium": "Arrowhead Stadium"
+    "date": "2026-07-06",
+    "time": "00:00:00Z",
+    "stadium": "Estadio Azteca"
   },
   {
     "id": "k21",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-11",
-    "time": "17:00:00Z",
-    "stadium": "Lumen Field"
+    "date": "2026-07-06",
+    "time": "19:00:00Z",
+    "stadium": "AT&T Stadium"
   },
   {
     "id": "k22",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-11",
-    "time": "20:00:00Z",
-    "stadium": "Hard Rock Stadium"
+    "date": "2026-07-07",
+    "time": "00:00:00Z",
+    "stadium": "Lumen Field"
   },
   {
     "id": "k23",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-12",
-    "time": "17:00:00Z",
-    "stadium": "NRG Stadium"
+    "date": "2026-07-07",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
   },
   {
     "id": "k24",
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-12",
+    "date": "2026-07-07",
     "time": "20:00:00Z",
-    "stadium": "Estadio Azteca"
+    "stadium": "BC Place"
   },
   {
     "id": "k25",
     "group": "QF",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-15",
-    "time": "17:00:00Z",
-    "stadium": "MetLife Stadium"
+    "date": "2026-07-09",
+    "time": "20:00:00Z",
+    "stadium": "Gillette Stadium"
   },
   {
     "id": "k26",
     "group": "QF",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-15",
-    "time": "20:00:00Z",
+    "date": "2026-07-10",
+    "time": "19:00:00Z",
     "stadium": "SoFi Stadium"
   },
   {
@@ -886,17 +886,17 @@
     "group": "QF",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-16",
-    "time": "17:00:00Z",
-    "stadium": "AT&T Stadium"
+    "date": "2026-07-11",
+    "time": "21:00:00Z",
+    "stadium": "Hard Rock Stadium"
   },
   {
     "id": "k28",
     "group": "QF",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-16",
-    "time": "20:00:00Z",
+    "date": "2026-07-12",
+    "time": "01:00:00Z",
     "stadium": "Arrowhead Stadium"
   },
   {
@@ -904,26 +904,26 @@
     "group": "SF",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-18",
-    "time": "20:00:00Z",
-    "stadium": "MetLife Stadium"
+    "date": "2026-07-14",
+    "time": "19:00:00Z",
+    "stadium": "AT&T Stadium"
   },
   {
     "id": "k30",
     "group": "SF",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-19",
-    "time": "20:00:00Z",
-    "stadium": "AT&T Stadium"
+    "date": "2026-07-15",
+    "time": "19:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
   },
   {
     "id": "k31",
     "group": "3rd",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-17",
-    "time": "17:00:00Z",
+    "date": "2026-07-18",
+    "time": "21:00:00Z",
     "stadium": "Hard Rock Stadium"
   },
   {
@@ -932,7 +932,7 @@
     "homeTeam": "TBD",
     "awayTeam": "TBD",
     "date": "2026-07-19",
-    "time": "20:00:00Z",
+    "time": "19:00:00Z",
     "stadium": "MetLife Stadium"
   }
 ]
