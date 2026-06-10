@@ -18,7 +18,7 @@ import { db } from './services/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 // Page Components
-function MatchesPage({ teams, schedule, standings, matchPicks, setMatchPicks, handleScoreChange, confirmPick }) {
+function MatchesPage({ teams, schedule, standings, matchPicks, setMatchPicks, handleScoreChange, confirmPick, actualResults, user }) {
   return (
     <>
       <MatchGrid
@@ -28,7 +28,9 @@ function MatchesPage({ teams, schedule, standings, matchPicks, setMatchPicks, ha
         matchPicks={matchPicks}
         setMatchPicks={setMatchPicks}
         onScoreChange={handleScoreChange}
-        onConfirm={confirmPick}
+        onConfirmPick={confirmPick}
+        actualResults={actualResults}
+        user={user}
       />
     </>
   );
@@ -227,6 +229,26 @@ function AppContent() {
       }
     };
     loadActualResults();
+  }, []);
+
+  // Refresh data when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        try {
+          const results = await fetchActualResults();
+          setActualResults(results);
+          console.log('Data refreshed on tab visibility');
+        } catch (error) {
+          console.error("Error refreshing data on tab visibility:", error);
+        }
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 
   useEffect(() => {
@@ -438,6 +460,8 @@ function AppContent() {
               setMatchPicks={setMatchPicks}
               handleScoreChange={handleScoreChange}
               confirmPick={confirmPick}
+              actualResults={actualResults}
+              user={user}
             />
           } />
           <Route path="/standings" element={

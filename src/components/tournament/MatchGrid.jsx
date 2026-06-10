@@ -1,7 +1,7 @@
 import React from 'react';
 import { isMatchLocked, formatMatchTime, calculateMatchPoints } from '../../utils/scoringEngine';
 
-export default function MatchGrid({ schedule, teams, matchPicks, actualResults, onScoreChange, onConfirmPick }) {
+export default function MatchGrid({ schedule, teams, matchPicks, actualResults, onScoreChange, onConfirmPick, user }) {
   // Disable knockout match editing until one day after last group match (June 28, 2026)
   const knockoutLockDate = new Date('2026-06-28T00:00:00Z');
   const isKnockoutLocked = (match) => {
@@ -36,10 +36,10 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
           <div key={match.id} className={`bg-zinc-900/80 border p-3 sm:p-4 rounded-xl flex flex-col justify-between transition-all ${
             matchCompleted 
               ? (pointsEarned > 0 
-                  ? 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                  : 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]')
+                  ? `${user ? 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.4)]' : 'border-zinc-800'}` 
+                  : `${user ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'border-zinc-800'}`)
               : (locked || knockoutLocked)
-                  ? 'border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)] opacity-80'
+                  ? `${user ? 'border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'border-zinc-800'} opacity-80`
                   : 'border-zinc-800 hover:border-zinc-700'
           }`}>
             <div className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-widest font-semibold mb-2 flex justify-between">
@@ -49,10 +49,10 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
               </span>
             </div>
 
-            <div className="flex items-center justify-between gap-3 sm:gap-4">
-              <div className="flex items-center gap-2 sm:gap-3 w-[42%]">
+            <div className="flex items-center justify-between gap-4 sm:gap-4">
+              <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-3 w-[42%]">
                 <span className="text-xl sm:text-2xl">{home?.flag}</span>
-                <span className="text-xs sm:text-sm font-medium text-zinc-100">{home?.name}</span>
+                <span className="text-xs sm:text-sm font-medium text-zinc-100 text-center sm:text-left">{home?.name}</span>
               </div>
 
               <div className="flex items-center gap-2 justify-center w-[16%]">
@@ -91,9 +91,9 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
                 )}
               </div>
 
-              <div className="flex items-center gap-2 sm:gap-3 justify-end w-[42%] text-right">
-                <span className="text-xs sm:text-sm font-medium text-zinc-100">{away?.name}</span>
+              <div className="flex flex-col items-center gap-1 sm:flex-row sm:gap-3 justify-end w-[42%] text-right">
                 <span className="text-xl sm:text-2xl">{away?.flag}</span>
+                <span className="text-xs sm:text-sm font-medium text-zinc-100 text-center sm:text-right">{away?.name}</span>
               </div>
             </div>
 

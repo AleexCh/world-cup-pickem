@@ -9,6 +9,13 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
+  const [lastActivity, setLastActivity] = useState(Date.now());
+  const SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+
+  // Reset activity timer on user interactions
+  const resetActivityTimer = () => {
+    setLastActivity(Date.now());
+  };
 
   useEffect(() => {
     if (!isFirebaseEnabled) {
@@ -46,6 +53,7 @@ export function AuthProvider({ children }) {
         }
 
         setUser(firebaseUser);
+        setLastActivity(Date.now());
       } else {
         setUser(null);
       }
@@ -55,6 +63,34 @@ export function AuthProvider({ children }) {
 
     return () => unsubscribe();
   }, []);
+
+  // Session timeout check
+  useEffect(() => {
+    if (!user) return;
+
+    const checkSessionTimeout = () => {
+      const now = Date.now();
+      if (now - lastActivity > SESSION_TIMEOUT) {
+        console.log('Session timed out, signing out...');
+        logout();
+      }
+    };
+
+    const timeoutCheck = setInterval(checkSessionTimeout, 60000); // Check every minute
+
+    // Add event listeners for user activity
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click'];
+    events.forEach(event => {
+      window.addEventListener(event, resetActivityTimer);
+    });
+
+    return () => {
+      clearInterval(timeoutCheck);
+      events.forEach(event => {
+        window.removeEventListener(event, resetActivityTimer);
+      });
+    };
+  }, [user, lastActivity]);
 
   const loginWithGoogle = async () => {
     if (!isFirebaseEnabled) {
@@ -80,6 +116,8 @@ export function AuthProvider({ children }) {
       // Add a small delay to show the loading animation
       await new Promise(resolve => setTimeout(resolve, 1500));
       await signOut(auth);
+      // Refresh the page after signing out
+      window.location.reload();
     } catch (error) {
       console.error("Logout Error:", error);
       setAuthLoading(false);
