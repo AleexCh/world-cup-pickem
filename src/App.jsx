@@ -34,18 +34,53 @@ function MatchesPage({ teams, schedule, standings, matchPicks, setMatchPicks, ha
   );
 }
 
-function StandingsPage({ teams, schedule, standings, groupPoints }) {
+function StandingsPage({ teams, schedule, standings, groupPoints, actualResults }) {
   const groupLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+  const [showResults, setShowResults] = useState(false);
+  
+  // Calculate actual standings based on actualResults
+  const actualStandings = React.useMemo(() => {
+    if (!actualResults || !actualResults.matchPicks) return null;
+    const actualMatches = actualResults.matchPicks;
+    return calculateStandings(actualMatches, schedule, teams);
+  }, [actualResults, schedule, teams]);
+
+  // Determine which standings to show
+  const displayStandings = showResults ? actualStandings : standings;
+  
+  // Only pass groupPoints when showing user picks, not when showing actual results
+  const shouldShowGroupPoints = !showResults;
   
   return (
     <>
+      <div className="mb-6 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <label className="relative inline-flex items-center cursor-pointer">
+            <input
+              type="checkbox"
+              className="sr-only peer"
+              checked={showResults}
+              onChange={(e) => setShowResults(e.target.checked)}
+            />
+            <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+          </label>
+          <span className="text-sm font-medium text-zinc-300">
+            {showResults ? 'Showing Results' : 'Showing My Picks'}
+          </span>
+        </div>
+        {showResults && !actualResults && (
+          <span className="text-xs text-zinc-500">No results available yet</span>
+        )}
+      </div>
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         {groupLetters.map(letter => (
           <GroupTable
             key={letter}
             groupLetter={letter}
-            groupStandings={standings[letter] || []}
-            groupPoints={groupPoints[letter] || null}
+            groupStandings={displayStandings[letter] || []}
+            groupPoints={shouldShowGroupPoints ? (groupPoints[letter] || null) : null}
+            showActualResults={showResults}
           />
         ))}
       </div>
@@ -411,6 +446,7 @@ function AppContent() {
               schedule={schedule}
               standings={standings}
               groupPoints={groupPoints}
+              actualResults={actualResults}
             />
           } />
           <Route path="/knockout-matches" element={
