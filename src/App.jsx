@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useSyncPicks } from './hooks/useSyncPicks';
 import AuthBanner from './components/auth/AuthBanner';
@@ -17,10 +17,104 @@ import { scoreUserPredictions, fetchActualResults, calculateGroupStandingPoints 
 import { db } from './services/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
+// Page Components
+function MatchesPage({ teams, schedule, standings, matchPicks, setMatchPicks, handleScoreChange, confirmPick }) {
+  return (
+    <>
+      <MatchGrid
+        teams={teams}
+        schedule={schedule}
+        standings={standings}
+        matchPicks={matchPicks}
+        setMatchPicks={setMatchPicks}
+        onScoreChange={handleScoreChange}
+        onConfirm={confirmPick}
+      />
+    </>
+  );
+}
+
+function StandingsPage({ teams, schedule, standings, groupPoints }) {
+  const groupLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
+  
+  return (
+    <>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {groupLetters.map(letter => (
+          <GroupTable
+            key={letter}
+            groupLetter={letter}
+            groupStandings={standings[letter] || []}
+            groupPoints={groupPoints[letter] || null}
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+function KnockoutMatchesPage({ teams, schedule, matchPicks, setMatchPicks, handleScoreChange, confirmPick }) {
+  return (
+    <>
+      <KnockoutMatches
+        teams={teams}
+        schedule={schedule}
+        matchPicks={matchPicks}
+        setMatchPicks={setMatchPicks}
+        onScoreChange={handleScoreChange}
+        onConfirm={confirmPick}
+      />
+    </>
+  );
+}
+
+function KnockoutBracketPage({ knockoutPicks, setKnockoutPicks, teams, onConfirm, schedule, matchPicks, actualResults, isAdmin }) {
+  return (
+    <>
+      <KnockoutBracket
+        knockoutPicks={knockoutPicks}
+        setKnockoutPicks={setKnockoutPicks}
+        teams={teams}
+        onConfirm={onConfirm}
+        schedule={schedule}
+        matchPicks={matchPicks}
+        actualResults={actualResults}
+        isAdmin={isAdmin}
+      />
+    </>
+  );
+}
+
+function LeaderboardPage({ user }) {
+  return (
+    <>
+      <Leaderboard />
+    </>
+  );
+}
+
+function ProfilePage({ knockoutPicks, setKnockoutPicks, teams, isFirebaseEnabled, user }) {
+  return (
+    <>
+      <Profile />
+    </>
+  );
+}
+
+function AdminPage({ schedule, teams, standings }) {
+  return (
+    <>
+      <AdminPanel schedule={schedule} teams={teams} standings={standings} />
+    </>
+  );
+}
+
 function AppContent() {
   const { user } = useAuth();
   const userId = user?.uid || null;
   const { matchPicks, setMatchPicks, knockoutPicks, setKnockoutPicks, loading, confirmPick, confirmKnockoutPicks } = useSyncPicks(userId);
+  const location = useLocation();
+  const navigate = useNavigate();
   
   const [teams, setTeams] = useState({});
   const [schedule, setSchedule] = useState([]);
@@ -29,7 +123,6 @@ function AppContent() {
   const [groupPoints, setGroupPoints] = useState({});
   const [actualResults, setActualResults] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
-  const [activeTab, setActiveTab] = useState('matches');
   
   const scoreUpdateTimeoutRef = useRef(null);
   const previousScoreRef = useRef(null);
@@ -212,82 +305,82 @@ function AppContent() {
         <div className="mb-6 overflow-x-auto border-b border-zinc-800 pb-4 scrollbar-hide">
           <div className="flex gap-2 min-w-max items-center justify-between">
             <div className="flex gap-2 min-w-max">
-            <button
-              onClick={() => setActiveTab('matches')}
-              className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                activeTab === 'matches'
-                  ? 'bg-amber-500 text-zinc-950'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-              }`}
-            >
-              Group Matches
-            </button>
-            <button
-              onClick={() => setActiveTab('standings')}
-              className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                activeTab === 'standings'
-                  ? 'bg-amber-500 text-zinc-950'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-              }`}
-            >
-              Standings
-            </button>
-            <button
-              onClick={() => setActiveTab('knockout-matches')}
-              className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                activeTab === 'knockout-matches'
-                  ? 'bg-amber-500 text-zinc-950'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-              }`}
-            >
-              Knockout Matches
-            </button>
-            {(allGroupMatchesCompleted || isAdmin) && (
-              <button
-                onClick={() => setActiveTab('knockout-bracket')}
+              <Link
+                to="/matches"
                 className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  activeTab === 'knockout-bracket'
+                  location.pathname === '/matches'
                     ? 'bg-amber-500 text-zinc-950'
                     : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                 }`}
               >
-                Knockout Bracket
-              </button>
-            )}
-            <button
-              onClick={() => setActiveTab('leaderboard')}
-              className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                activeTab === 'leaderboard'
-                  ? 'bg-amber-500 text-zinc-950'
-                  : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-              }`}
-            >
-              Leaderboard
-            </button>
-            {user && (
-              <button
-                onClick={() => setActiveTab('profile')}
+                Group Matches
+              </Link>
+              <Link
+                to="/standings"
                 className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  activeTab === 'profile'
-                    ? 'bg-emerald-500 text-zinc-950'
+                  location.pathname === '/standings'
+                    ? 'bg-amber-500 text-zinc-950'
                     : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                 }`}
               >
-                Profile
-              </button>
-            )}
-            {isAdmin && (
-              <button
-                onClick={() => setActiveTab('admin')}
+                Standings
+              </Link>
+              <Link
+                to="/knockout-matches"
                 className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  activeTab === 'admin'
-                    ? 'bg-red-500 text-zinc-950'
+                  location.pathname === '/knockout-matches'
+                    ? 'bg-amber-500 text-zinc-950'
                     : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                 }`}
               >
-                Admin Panel
-              </button>
-            )}
+                Knockout Matches
+              </Link>
+              {(allGroupMatchesCompleted || isAdmin) && (
+                <Link
+                  to="/knockout-bracket"
+                  className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                    location.pathname === '/knockout-bracket'
+                      ? 'bg-amber-500 text-zinc-950'
+                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                  }`}
+                >
+                  Knockout Bracket
+                </Link>
+              )}
+              <Link
+                to="/leaderboard"
+                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                  location.pathname === '/leaderboard'
+                    ? 'bg-amber-500 text-zinc-950'
+                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                }`}
+              >
+                Leaderboard
+              </Link>
+              {user && (
+                <Link
+                  to="/profile"
+                  className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                    location.pathname === '/profile'
+                      ? 'bg-emerald-500 text-zinc-950'
+                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                  }`}
+                >
+                  Profile
+                </Link>
+              )}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                    location.pathname === '/admin'
+                      ? 'bg-red-500 text-zinc-950'
+                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
+                  }`}
+                >
+                  Admin Panel
+                </Link>
+              )}
             </div>
             
             {/* Score Badge on the right - only show when signed in */}
@@ -299,69 +392,70 @@ function AppContent() {
           </div>
         </div>
 
-        {activeTab === 'matches' && (
-          <div>
-            <MatchGrid
+        <Routes>
+          <Route path="/" element={<Navigate to="/matches" replace />} />
+          <Route path="/matches" element={
+            <MatchesPage
+              teams={teams}
               schedule={groupSchedule}
-              teams={teams}
+              standings={standings}
               matchPicks={matchPicks}
-              actualResults={actualResults}
-              onScoreChange={handleScoreChange}
-              onConfirmPick={confirmPick}
+              setMatchPicks={setMatchPicks}
+              handleScoreChange={handleScoreChange}
+              confirmPick={confirmPick}
             />
-          </div>
-        )}
-
-        {activeTab === 'standings' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {groupLetters.map(letter => (
-              <GroupTable
-                key={letter}
-                groupLetter={letter}
-                groupStandings={standings[letter] || []}
-                groupPoints={groupPoints[letter] || null}
-              />
-            ))}
-          </div>
-        )}
-
-        {activeTab === 'knockout-matches' && (
-          <div>
-            <MatchGrid
+          } />
+          <Route path="/standings" element={
+            <StandingsPage
+              teams={teams}
+              schedule={schedule}
+              standings={standings}
+              groupPoints={groupPoints}
+            />
+          } />
+          <Route path="/knockout-matches" element={
+            <KnockoutMatchesPage
+              teams={teams}
               schedule={knockoutSchedule}
-              teams={teams}
               matchPicks={matchPicks}
-              actualResults={actualResults}
-              onScoreChange={handleScoreChange}
-              onConfirmPick={confirmPick}
+              setMatchPicks={setMatchPicks}
+              handleScoreChange={handleScoreChange}
+              confirmPick={confirmPick}
             />
-          </div>
-        )}
-
-        {activeTab === 'knockout-bracket' && (allGroupMatchesCompleted || isAdmin) && (
-          <KnockoutBracket
-            knockoutPicks={knockoutPicks}
-            setKnockoutPicks={setKnockoutPicks}
-            teams={teams}
-            onConfirm={confirmKnockoutPicks}
-            schedule={schedule}
-            matchPicks={matchPicks}
-            actualResults={actualResults}
-            isAdmin={isAdmin}
-          />
-        )}
-
-        {activeTab === 'leaderboard' && (
-          <Leaderboard />
-        )}
-
-        {activeTab === 'profile' && user && (
-          <Profile />
-        )}
-
-        {activeTab === 'admin' && isAdmin && (
-          <AdminPanel schedule={schedule} teams={teams} />
-        )}
+          } />
+          <Route path="/knockout-bracket" element={
+            (allGroupMatchesCompleted || isAdmin) ? (
+              <KnockoutBracketPage
+                knockoutPicks={knockoutPicks}
+                setKnockoutPicks={setKnockoutPicks}
+                teams={teams}
+                onConfirm={confirmKnockoutPicks}
+                schedule={schedule}
+                matchPicks={matchPicks}
+                actualResults={actualResults}
+                isAdmin={isAdmin}
+              />
+            ) : (
+              <Navigate to="/matches" replace />
+            )
+          } />
+          <Route path="/leaderboard" element={<LeaderboardPage user={user} />} />
+          <Route path="/profile" element={
+            user ? (
+              <ProfilePage knockoutPicks={knockoutPicks} setKnockoutPicks={setKnockoutPicks} teams={teams} isFirebaseEnabled user={user} />
+            ) : (
+              <Navigate to="/matches" replace />
+            )
+          } />
+          <Route path="/admin" element={
+            isAdmin ? (
+              <AdminPage schedule={schedule} teams={teams} standings={standings} />
+            ) : (
+              <Navigate to="/matches" replace />
+            )
+          } />
+          <Route path="*" element={<Navigate to="/matches" replace />} />
+        </Routes>
       </div>
 
       <ScrollToTop />
