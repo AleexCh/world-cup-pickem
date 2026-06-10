@@ -12,9 +12,13 @@
     "test:run": "vitest run"
   },
   "dependencies": {
+    "@g-loot/react-tournament-brackets": "^1.0.31-rc",
     "firebase": "^10.14.1",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^7.17.0",
+    "react-svg-pan-zoom": "^3.13.1",
+    "styled-components": "^6.4.2"
   },
   "devDependencies": {
     "@types/react": "^18.2.43",

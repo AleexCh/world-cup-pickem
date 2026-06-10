@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useSyncPicks } from './hooks/useSyncPicks';
 import AuthBanner from './components/auth/AuthBanner';
@@ -6,6 +7,7 @@ import Profile from './components/auth/Profile';
 import MatchGrid from './components/tournament/MatchGrid';
 import GroupTable from './components/tournament/GroupTable';
 import KnockoutBracket from './components/knockout/KnockoutBracket';
+import KnockoutMatches from './components/knockout/KnockoutMatches';
 import Leaderboard from './components/dashboard/Leaderboard';
 import PlayerScoreBadge from './components/dashboard/PlayerScoreBadge';
 import ScrollToTop from './components/common/ScrollToTop';
@@ -342,6 +344,10 @@ function AppContent() {
             setKnockoutPicks={setKnockoutPicks}
             teams={teams}
             onConfirm={confirmKnockoutPicks}
+            schedule={schedule}
+            matchPicks={matchPicks}
+            actualResults={actualResults}
+            isAdmin={isAdmin}
           />
         )}
 
