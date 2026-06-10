@@ -2,14 +2,13 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ mode }) => ({
-  base: mode === 'development' ? '/' : '/world-cup-pickem/', // Use '/' for dev, '/world-cup-pickem/' for production
+  base: mode === 'development' ? '/' : '/world-cup-pickem/',
   plugins: [react()],
   test: {
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
     env: {
-      // Mock Firebase environment variables for testing
       VITE_FIREBASE_API_KEY: 'test-api-key',
       VITE_FIREBASE_AUTH_DOMAIN: 'test-project.firebaseapp.com',
       VITE_FIREBASE_PROJECT_ID: 'test-project',
@@ -28,4 +27,4 @@ export default defineConfig(({ mode }) => ({
       ],
     },
   },
-})
+}))
