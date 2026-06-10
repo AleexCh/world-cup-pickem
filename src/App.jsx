@@ -207,7 +207,7 @@ function AppContent() {
 
         <AuthBanner />
 
-        <div className="mb-6 overflow-x-auto border-b border-zinc-800 pb-4">
+        <div className="mb-6 overflow-x-auto border-b border-zinc-800 pb-4 scrollbar-hide">
           <div className="flex gap-2 min-w-max items-center justify-between">
             <div className="flex gap-2 min-w-max">
             <button
