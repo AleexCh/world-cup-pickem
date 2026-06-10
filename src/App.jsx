@@ -275,10 +275,12 @@ function AppContent() {
             )}
             </div>
             
-            {/* Score Badge on the right */}
-            <div className="ml-4">
-              <PlayerScoreBadge totalScore={totalScore} user={user} compact={true} />
-            </div>
+            {/* Score Badge on the right - only show when signed in */}
+            {user && (
+              <div className="ml-4">
+                <PlayerScoreBadge totalScore={totalScore} user={user} compact={true} />
+              </div>
+            )}
           </div>
         </div>
 
