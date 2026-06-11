@@ -160,9 +160,39 @@ function AppContent() {
   const [groupPoints, setGroupPoints] = useState({});
   const [actualResults, setActualResults] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const scoreUpdateTimeoutRef = useRef(null);
   const previousScoreRef = useRef(null);
+
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const isAdmin = user?.email?.toLowerCase() === adminEmail?.toLowerCase();
+  const allGroupMatchesCompleted = actualResults && allGroupMatchesScored(actualResults, schedule);
+
+  // Define navigation items
+  const navItems = React.useMemo(() => {
+    const items = [
+      { to: '/matches', label: 'Group Matches', color: 'amber' },
+      { to: '/standings', label: 'Standings', color: 'amber' },
+      { to: '/knockout-matches', label: 'Knockout Matches', color: 'amber' },
+    ];
+    
+    if (allGroupMatchesCompleted || isAdmin) {
+      items.push({ to: '/knockout-bracket', label: 'Knockout Bracket', color: 'amber' });
+    }
+    
+    items.push({ to: '/leaderboard', label: 'Leaderboard', color: 'amber' });
+    
+    if (user) {
+      items.push({ to: '/profile', label: 'Profile', color: 'emerald' });
+    }
+    
+    if (isAdmin) {
+      items.push({ to: '/admin', label: 'Admin Panel', color: 'red' });
+    }
+    
+    return items;
+  }, [allGroupMatchesCompleted, isAdmin, user]);
 
   // Filter schedule into group stage and knockout stage
   const groupSchedule = schedule.filter(match => match.group && match.group.match(/^[A-L]$/));
@@ -177,10 +207,6 @@ function AppContent() {
     }
     return match;
   });
-
-  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
-  const isAdmin = user?.email?.toLowerCase() === adminEmail?.toLowerCase();
-  const allGroupMatchesCompleted = actualResults && allGroupMatchesScored(actualResults, schedule);
 
   useEffect(() => {
     // Load static data
@@ -359,85 +385,37 @@ function AppContent() {
 
         <AuthBanner />
 
-        <div className="mb-6 overflow-x-auto border-b border-zinc-800 pb-4 scrollbar-hide">
-          <div className="flex gap-2 min-w-max items-center justify-between">
-            <div className="flex gap-2 min-w-max">
-              <Link
-                to="/matches"
-                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  location.pathname === '/matches'
-                    ? 'bg-amber-500 text-zinc-950'
-                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-                }`}
-              >
-                Group Matches
-              </Link>
-              <Link
-                to="/standings"
-                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  location.pathname === '/standings'
-                    ? 'bg-amber-500 text-zinc-950'
-                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-                }`}
-              >
-                Standings
-              </Link>
-              <Link
-                to="/knockout-matches"
-                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  location.pathname === '/knockout-matches'
-                    ? 'bg-amber-500 text-zinc-950'
-                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-                }`}
-              >
-                Knockout Matches
-              </Link>
-              {(allGroupMatchesCompleted || isAdmin) && (
+        <div className="mb-6 border-b border-zinc-800 pb-4">
+          <div className="flex items-center justify-between">
+            {/* Hamburger menu button (mobile only) */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-all lg:hidden"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+
+            {/* Visible tabs (desktop only) */}
+            <div className="hidden lg:flex gap-2 flex-1 overflow-hidden">
+              {navItems.map((item) => (
                 <Link
-                  to="/knockout-bracket"
+                  key={item.to}
+                  to={item.to}
                   className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                    location.pathname === '/knockout-bracket'
-                      ? 'bg-amber-500 text-zinc-950'
+                    location.pathname === item.to
+                      ? `bg-${item.color}-500 text-zinc-950`
                       : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
                   }`}
                 >
-                  Knockout Bracket
+                  {item.label}
                 </Link>
-              )}
-              <Link
-                to="/leaderboard"
-                className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                  location.pathname === '/leaderboard'
-                    ? 'bg-amber-500 text-zinc-950'
-                    : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-                }`}
-              >
-                Leaderboard
-              </Link>
-              {user && (
-                <Link
-                  to="/profile"
-                  className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                    location.pathname === '/profile'
-                      ? 'bg-emerald-500 text-zinc-950'
-                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-                  }`}
-                >
-                  Profile
-                </Link>
-              )}
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className={`px-3 py-2 rounded-lg font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
-                    location.pathname === '/admin'
-                      ? 'bg-red-500 text-zinc-950'
-                      : 'bg-zinc-900 text-zinc-400 hover:bg-zinc-800'
-                  }`}
-                >
-                  Admin Panel
-                </Link>
-              )}
+              ))}
             </div>
             
             {/* Score Badge on the right - only show when signed in */}
@@ -448,6 +426,50 @@ function AppContent() {
             )}
           </div>
         </div>
+
+        {/* Side panel backdrop */}
+        {mobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+        )}
+
+        {/* Side panel */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-y-0 left-0 w-72 bg-zinc-900 border-r border-zinc-800 z-50 lg:hidden transform transition-transform duration-300 ease-in-out">
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-bold text-zinc-100">Menu</h2>
+                <button
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="p-2 rounded-lg bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100 transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <div className="flex flex-col gap-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`px-4 py-3 rounded-lg font-medium text-sm transition-all flex items-center gap-3 ${
+                      location.pathname === item.to
+                        ? `bg-${item.color}-500 text-zinc-950`
+                        : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-100'
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <Routes>
           <Route path="/" element={<Navigate to="/matches" replace />} />

@@ -40,7 +40,7 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
                   : `${user ? 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]' : 'border-zinc-800'}`)
               : (locked || knockoutLocked)
                   ? `${user ? 'border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]' : 'border-zinc-800'} opacity-80`
-                  : 'border-zinc-800 hover:border-zinc-700'
+                  : 'border-zinc-800 hover:border-amber-500/50 hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 hover:bg-zinc-800/90 cursor-pointer'
           }`}>
             <div className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-widest font-semibold mb-2 flex justify-between">
               <span>Group {match.group}</span>

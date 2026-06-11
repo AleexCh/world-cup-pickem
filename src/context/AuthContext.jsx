@@ -10,7 +10,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [authLoading, setAuthLoading] = useState(false);
   const [lastActivity, setLastActivity] = useState(Date.now());
-  const SESSION_TIMEOUT = 10 * 60 * 1000; // 10 minutes in milliseconds
+  const SESSION_TIMEOUT = 60 * 60 * 1000; // 10 minutes in milliseconds
 
   // Reset activity timer on user interactions
   const resetActivityTimer = () => {
