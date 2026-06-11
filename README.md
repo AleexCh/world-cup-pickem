@@ -10,7 +10,7 @@ A web application for predicting FIFA World Cup 2026 match scores and building k
 
 - **Group Stage Predictions**: Predict scores for all 48 group stage matches across 12 groups
 - **Live Standings**: View calculated group standings based on your predictions
-- **Knockout Stage**: Build your complete knockout bracket from Round of 16 to the Final
+- **Knockout Stage**: Build your complete knockout bracket from Round of 32 to the Final
 - **Real-time Scoring**: Automatic scoring based on actual match results
 - **Leaderboard**: Compete with other players and track rankings
 - **Firebase Authentication**: Secure user authentication with email/password
@@ -18,11 +18,14 @@ A web application for predicting FIFA World Cup 2026 match scores and building k
 - **Responsive Design**: Works seamlessly on desktop and mobile devices
 
 ## Tech Stack
-
+ 
 - **Frontend**: React 18.2.0
+- **Routing**: React Router DOM 7.17.0
 - **Build Tool**: Vite 8.0.16
-- **Styling**: Tailwind CSS 3.4.0
-- **Backend**: Firebase (Authentication & Firestore)
+- **Styling**: Tailwind CSS 3.4.0, styled-components 4.4.1
+- **Bracket Visualization**: @g-loot/react-tournament-brackets 1.0.31-rc
+- **SVG Pan/Zoom**: react-svg-pan-zoom 3.13.1
+- **Backend**: Firebase (Authentication & Firestore) 10.14.1
 - **Testing**: Vitest 4.1.8
 - **Language**: JavaScript (JSX)
 
@@ -85,7 +88,8 @@ A web application for predicting FIFA World Cup 2026 match scores and building k
 1. **Sign Up**: Create an account using email and password
 2. **Make Predictions**: 
    - Navigate to "Group Matches" to predict group stage scores
-   - Navigate to "Knockout Bracket" to build your knockout predictions
+   - Navigate to "Knockout Matches" to predict knockout stage scores
+   - Navigate to "Knockout Bracket" to build your knockout bracket predictions
 3. **View Standings**: Check the "Standings" tab to see group standings based on predictions
 4. **Track Progress**: Visit the "Leaderboard" to see how you rank against other players
 
@@ -142,9 +146,11 @@ world-cup-pickem/
 ## Scoring System
 
 The application uses a comprehensive scoring system:
-- **Exact Score**: Full points for predicting the exact score
-- **Correct Result**: Partial points for predicting the right winner/draw
-- **Bonus Points**: Additional points for difficult predictions
+- **Correct Outcome**: 10 points for predicting the right winner/draw
+- **Exact Score Bonus**: +15 points for predicting the exact score (25 total)
+- **Group Standing Points**: 1st place = 10pts, 2nd = 8pts, 3rd = 6pts, 4th = 4pts
+- **Knockout Stage Points**: Round of 32 = 10pts, Round of 16 = 20pts, Quarter-Finals = 30pts, Semi-Finals = 45pts, Final = 60pts
+- **Champion Bonus**: 100 points for correctly predicting the tournament champion
 
 Scores are calculated automatically as match results are updated by administrators.
 
@@ -156,6 +162,8 @@ The application uses the following Firestore collections:
   - `email`, `displayName`, `totalPoints`, `scoreUpdatedAt`
 - `picks` - User predictions for matches
   - `userId`, `matchPicks`, `knockoutPicks`
+- `actualResults` - Official match results for scoring
+  - `matchPicks`, `knockoutPicks`
 - `knockoutTeams` - Dynamically updated knockout stage teams
   - `teams` - Map of match IDs to team matchups
 
