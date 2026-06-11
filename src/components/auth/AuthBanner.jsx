@@ -25,7 +25,7 @@ export default function AuthBanner() {
           </>
         ) : (
           <div>
-            <p className="font-semibold">⚠️ Playing Guest Mode (Local Device Only)</p>
+            <p className="font-semibold">⚠️ Playing Guest Mode </p>
             <p className="text-xs opacity-75">
               {isFirebaseEnabled 
                 ? "Sign in with Google to track live points and join the multiplayer leaderboard!" 
