@@ -67,7 +67,7 @@ function StandingsPage({ teams, schedule, standings, groupPoints, actualResults 
             <div className="w-11 h-6 bg-zinc-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
           </label>
           <span className="text-sm font-medium text-zinc-300">
-            {showResults ? 'Showing Results' : 'Showing My Picks'}
+            {showResults ? 'Showing Official Results' : 'Showing My Picks'}
           </span>
         </div>
         {showResults && !actualResults && (
@@ -173,7 +173,7 @@ function AppContent() {
   const navItems = React.useMemo(() => {
     const items = [
       { to: '/matches', label: 'Group Matches', color: 'amber' },
-      { to: '/standings', label: 'Standings', color: 'amber' },
+      { to: '/standings', label: 'Group Standings', color: 'amber' },
       { to: '/knockout-matches', label: 'Knockout Matches', color: 'amber' },
     ];
     

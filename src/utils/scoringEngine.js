@@ -3,7 +3,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { calculateStandings } from './tournamentLogic';
 
 /**
- * Fetches actual match results from Firestore
+ * Fetches actual match results from Firestore with caching
  * @returns {Object} Actual results document or null if not available
  */
 export async function fetchActualResults() {
@@ -11,17 +11,62 @@ export async function fetchActualResults() {
     return null;
   }
 
+  const CACHE_KEY = 'actualResultsCache';
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+  // Check localStorage cache first
+  try {
+    const cachedData = localStorage.getItem(CACHE_KEY);
+    if (cachedData) {
+      const { data, timestamp } = JSON.parse(cachedData);
+      const age = Date.now() - timestamp;
+      
+      // Return cached data if it's fresh
+      if (age < CACHE_DURATION) {
+        console.log('Using cached actual results (age:', Math.round(age / 1000), 'seconds)');
+        return data;
+      }
+    }
+  } catch (error) {
+    console.error("Error reading from cache:", error);
+  }
+
+  // Fetch from Firestore if cache is stale or missing
   try {
     const docRef = doc(db, 'actualResults', 'matchResults');
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      return docSnap.data();
+      const data = docSnap.data();
+      
+      // Cache the results
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({
+          data,
+          timestamp: Date.now()
+        }));
+      } catch (error) {
+        console.error("Error writing to cache:", error);
+      }
+      
+      return data;
     }
     return null;
   } catch (error) {
     console.error("Error fetching actual results:", error);
     return null;
+  }
+}
+
+/**
+ * Clears the actual results cache (useful after admin updates)
+ */
+export function clearActualResultsCache() {
+  try {
+    localStorage.removeItem('actualResultsCache');
+    console.log('Actual results cache cleared');
+  } catch (error) {
+    console.error("Error clearing cache:", error);
   }
 }
 
