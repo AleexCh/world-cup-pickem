@@ -1,0 +1,938 @@
+[
+  {
+    "id": "m1",
+    "group": "A",
+    "homeTeam": "MEX",
+    "awayTeam": "RSA",
+    "date": "2026-06-11",
+    "time": "19:00:00Z",
+    "stadium": "Estadio Azteca"
+  },
+  {
+    "id": "m2",
+    "group": "A",
+    "homeTeam": "KOR",
+    "awayTeam": "CZE",
+    "date": "2026-06-12",
+    "time": "02:00:00Z",
+    "stadium": "Estadio Akron"
+  },
+  {
+    "id": "m3",
+    "group": "A",
+    "homeTeam": "CZE",
+    "awayTeam": "RSA",
+    "date": "2026-06-18",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "m4",
+    "group": "A",
+    "homeTeam": "MEX",
+    "awayTeam": "KOR",
+    "date": "2026-06-19",
+    "time": "01:00:00Z",
+    "stadium": "Estadio Akron"
+  },
+  {
+    "id": "m5",
+    "group": "A",
+    "homeTeam": "CZE",
+    "awayTeam": "MEX",
+    "date": "2026-06-25",
+    "time": "01:00:00Z",
+    "stadium": "Estadio Azteca"
+  },
+  {
+    "id": "m6",
+    "group": "A",
+    "homeTeam": "RSA",
+    "awayTeam": "KOR",
+    "date": "2026-06-25",
+    "time": "01:00:00Z",
+    "stadium": "Estadio BBVA"
+  },
+  {
+    "id": "m7",
+    "group": "B",
+    "homeTeam": "CAN",
+    "awayTeam": "BIH",
+    "date": "2026-06-12",
+    "time": "19:00:00Z",
+    "stadium": "BMO Field"
+  },
+  {
+    "id": "m8",
+    "group": "B",
+    "homeTeam": "QAT",
+    "awayTeam": "SUI",
+    "date": "2026-06-13",
+    "time": "19:00:00Z",
+    "stadium": "Levi's Stadium"
+  },
+  {
+    "id": "m9",
+    "group": "B",
+    "homeTeam": "SUI",
+    "awayTeam": "BIH",
+    "date": "2026-06-18",
+    "time": "19:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "m10",
+    "group": "B",
+    "homeTeam": "CAN",
+    "awayTeam": "QAT",
+    "date": "2026-06-18",
+    "time": "22:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "m11",
+    "group": "B",
+    "homeTeam": "SUI",
+    "awayTeam": "CAN",
+    "date": "2026-06-24",
+    "time": "19:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "m12",
+    "group": "B",
+    "homeTeam": "BIH",
+    "awayTeam": "QAT",
+    "date": "2026-06-24",
+    "time": "19:00:00Z",
+    "stadium": "Lumen Field"
+  },
+  {
+    "id": "m13",
+    "group": "C",
+    "homeTeam": "BRA",
+    "awayTeam": "MAR",
+    "date": "2026-06-13",
+    "time": "22:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "m14",
+    "group": "C",
+    "homeTeam": "HAI",
+    "awayTeam": "SCO",
+    "date": "2026-06-14",
+    "time": "01:00:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "m15",
+    "group": "C",
+    "homeTeam": "SCO",
+    "awayTeam": "MAR",
+    "date": "2026-06-19",
+    "time": "22:00:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "m16",
+    "group": "C",
+    "homeTeam": "BRA",
+    "awayTeam": "HAI",
+    "date": "2026-06-20",
+    "time": "01:00:00Z",
+    "stadium": "Lincoln Financial Field"
+  },
+  {
+    "id": "m17",
+    "group": "C",
+    "homeTeam": "SCO",
+    "awayTeam": "BRA",
+    "date": "2026-06-24",
+    "time": "22:00:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "m18",
+    "group": "C",
+    "homeTeam": "MAR",
+    "awayTeam": "HAI",
+    "date": "2026-06-24",
+    "time": "22:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "m19",
+    "group": "D",
+    "homeTeam": "USA",
+    "awayTeam": "PAR",
+    "date": "2026-06-13",
+    "time": "01:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "m20",
+    "group": "D",
+    "homeTeam": "AUS",
+    "awayTeam": "TUR",
+    "date": "2026-06-14",
+    "time": "04:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "m21",
+    "group": "D",
+    "homeTeam": "USA",
+    "awayTeam": "AUS",
+    "date": "2026-06-19",
+    "time": "19:00:00Z",
+    "stadium": "Lumen Field"
+  },
+  {
+    "id": "m22",
+    "group": "D",
+    "homeTeam": "TUR",
+    "awayTeam": "PAR",
+    "date": "2026-06-20",
+    "time": "04:00:00Z",
+    "stadium": "Levi's Stadium"
+  },
+  {
+    "id": "m23",
+    "group": "D",
+    "homeTeam": "TUR",
+    "awayTeam": "USA",
+    "date": "2026-06-25",
+    "time": "02:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "m24",
+    "group": "D",
+    "homeTeam": "PAR",
+    "awayTeam": "AUS",
+    "date": "2026-06-25",
+    "time": "02:00:00Z",
+    "stadium": "Levi's Stadium"
+  },
+  {
+    "id": "m25",
+    "group": "E",
+    "homeTeam": "GER",
+    "awayTeam": "CUW",
+    "date": "2026-06-14",
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "m26",
+    "group": "E",
+    "homeTeam": "CIV",
+    "awayTeam": "ECU",
+    "date": "2026-06-14",
+    "time": "23:00:00Z",
+    "stadium": "Lincoln Financial Field"
+  },
+  {
+    "id": "m27",
+    "group": "E",
+    "homeTeam": "GER",
+    "awayTeam": "CIV",
+    "date": "2026-06-20",
+    "time": "20:00:00Z",
+    "stadium": "BMO Field"
+  },
+  {
+    "id": "m28",
+    "group": "E",
+    "homeTeam": "ECU",
+    "awayTeam": "CUW",
+    "date": "2026-06-21",
+    "time": "00:00:00Z",
+    "stadium": "Arrowhead Stadium"
+  },
+  {
+    "id": "m29",
+    "group": "E",
+    "homeTeam": "ECU",
+    "awayTeam": "GER",
+    "date": "2026-06-25",
+    "time": "20:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "m30",
+    "group": "E",
+    "homeTeam": "CUW",
+    "awayTeam": "CIV",
+    "date": "2026-06-25",
+    "time": "20:00:00Z",
+    "stadium": "Lincoln Financial Field"
+  },
+  {
+    "id": "m31",
+    "group": "F",
+    "homeTeam": "NED",
+    "awayTeam": "JPN",
+    "date": "2026-06-14",
+    "time": "20:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "m32",
+    "group": "F",
+    "homeTeam": "SWE",
+    "awayTeam": "TUN",
+    "date": "2026-06-15",
+    "time": "02:00:00Z",
+    "stadium": "Estadio BBVA"
+  },
+  {
+    "id": "m33",
+    "group": "F",
+    "homeTeam": "NED",
+    "awayTeam": "SWE",
+    "date": "2026-06-20",
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "m34",
+    "group": "F",
+    "homeTeam": "TUN",
+    "awayTeam": "JPN",
+    "date": "2026-06-21",
+    "time": "04:00:00Z",
+    "stadium": "Estadio BBVA"
+  },
+  {
+    "id": "m35",
+    "group": "F",
+    "homeTeam": "JPN",
+    "awayTeam": "SWE",
+    "date": "2026-06-25",
+    "time": "23:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "m36",
+    "group": "F",
+    "homeTeam": "TUN",
+    "awayTeam": "NED",
+    "date": "2026-06-25",
+    "time": "23:00:00Z",
+    "stadium": "Arrowhead Stadium"
+  },
+  {
+    "id": "m37",
+    "group": "G",
+    "homeTeam": "IRN",
+    "awayTeam": "NZL",
+    "date": "2026-06-16",
+    "time": "01:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "m38",
+    "group": "G",
+    "homeTeam": "BEL",
+    "awayTeam": "EGY",
+    "date": "2026-06-15",
+    "time": "19:00:00Z",
+    "stadium": "Lumen Field"
+  },
+  {
+    "id": "m39",
+    "group": "G",
+    "homeTeam": "BEL",
+    "awayTeam": "IRN",
+    "date": "2026-06-21",
+    "time": "19:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "m40",
+    "group": "G",
+    "homeTeam": "NZL",
+    "awayTeam": "EGY",
+    "date": "2026-06-22",
+    "time": "01:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "m41",
+    "group": "G",
+    "homeTeam": "EGY",
+    "awayTeam": "IRN",
+    "date": "2026-06-27",
+    "time": "03:00:00Z",
+    "stadium": "Lumen Field"
+  },
+  {
+    "id": "m42",
+    "group": "G",
+    "homeTeam": "NZL",
+    "awayTeam": "BEL",
+    "date": "2026-06-27",
+    "time": "03:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "m43",
+    "group": "H",
+    "homeTeam": "ESP",
+    "awayTeam": "CPV",
+    "date": "2026-06-15",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "m44",
+    "group": "H",
+    "homeTeam": "SAU",
+    "awayTeam": "URU",
+    "date": "2026-06-15",
+    "time": "22:00:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "m45",
+    "group": "H",
+    "homeTeam": "ESP",
+    "awayTeam": "SAU",
+    "date": "2026-06-21",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "m46",
+    "group": "H",
+    "homeTeam": "URU",
+    "awayTeam": "CPV",
+    "date": "2026-06-21",
+    "time": "22:00:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "m47",
+    "group": "H",
+    "homeTeam": "CPV",
+    "awayTeam": "SAU",
+    "date": "2026-06-27",
+    "time": "00:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "m48",
+    "group": "H",
+    "homeTeam": "URU",
+    "awayTeam": "ESP",
+    "date": "2026-06-27",
+    "time": "00:00:00Z",
+    "stadium": "Estadio Akron"
+  },
+  {
+    "id": "m49",
+    "group": "I",
+    "homeTeam": "FRA",
+    "awayTeam": "SEN",
+    "date": "2026-06-16",
+    "time": "19:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "m50",
+    "group": "I",
+    "homeTeam": "IRQ",
+    "awayTeam": "NOR",
+    "date": "2026-06-16",
+    "time": "22:00:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "m51",
+    "group": "I",
+    "homeTeam": "FRA",
+    "awayTeam": "IRQ",
+    "date": "2026-06-22",
+    "time": "21:00:00Z",
+    "stadium": "Lincoln Financial Field"
+  },
+  {
+    "id": "m52",
+    "group": "I",
+    "homeTeam": "NOR",
+    "awayTeam": "SEN",
+    "date": "2026-06-23",
+    "time": "00:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "m53",
+    "group": "I",
+    "homeTeam": "NOR",
+    "awayTeam": "FRA",
+    "date": "2026-06-26",
+    "time": "19:00:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "m54",
+    "group": "I",
+    "homeTeam": "SEN",
+    "awayTeam": "IRQ",
+    "date": "2026-06-26",
+    "time": "19:00:00Z",
+    "stadium": "BMO Field"
+  },
+  {
+    "id": "m55",
+    "group": "J",
+    "homeTeam": "ARG",
+    "awayTeam": "ALG",
+    "date": "2026-06-17",
+    "time": "01:00:00Z",
+    "stadium": "Arrowhead Stadium"
+  },
+  {
+    "id": "m56",
+    "group": "J",
+    "homeTeam": "AUT",
+    "awayTeam": "JOR",
+    "date": "2026-06-17",
+    "time": "04:00:00Z",
+    "stadium": "Levi's Stadium"
+  },
+  {
+    "id": "m57",
+    "group": "J",
+    "homeTeam": "ARG",
+    "awayTeam": "AUT",
+    "date": "2026-06-22",
+    "time": "17:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "m58",
+    "group": "J",
+    "homeTeam": "JOR",
+    "awayTeam": "ALG",
+    "date": "2026-06-23",
+    "time": "03:00:00Z",
+    "stadium": "Levi's Stadium"
+  },
+  {
+    "id": "m59",
+    "group": "J",
+    "homeTeam": "ALG",
+    "awayTeam": "AUT",
+    "date": "2026-06-28",
+    "time": "02:00:00Z",
+    "stadium": "Arrowhead Stadium"
+  },
+  {
+    "id": "m60",
+    "group": "J",
+    "homeTeam": "JOR",
+    "awayTeam": "ARG",
+    "date": "2026-06-28",
+    "time": "02:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "m61",
+    "group": "K",
+    "homeTeam": "POR",
+    "awayTeam": "COD",
+    "date": "2026-06-17",
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "m62",
+    "group": "K",
+    "homeTeam": "UZB",
+    "awayTeam": "COL",
+    "date": "2026-06-18",
+    "time": "02:00:00Z",
+    "stadium": "Estadio Azteca"
+  },
+  {
+    "id": "m63",
+    "group": "K",
+    "homeTeam": "POR",
+    "awayTeam": "UZB",
+    "date": "2026-06-23",
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "m64",
+    "group": "K",
+    "homeTeam": "COL",
+    "awayTeam": "COD",
+    "date": "2026-06-24",
+    "time": "02:00:00Z",
+    "stadium": "Estadio Akron"
+  },
+  {
+    "id": "m65",
+    "group": "K",
+    "homeTeam": "COL",
+    "awayTeam": "POR",
+    "date": "2026-06-27",
+    "time": "23:30:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "m66",
+    "group": "K",
+    "homeTeam": "COD",
+    "awayTeam": "UZB",
+    "date": "2026-06-27",
+    "time": "23:30:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "m67",
+    "group": "L",
+    "homeTeam": "ENG",
+    "awayTeam": "CRO",
+    "date": "2026-06-17",
+    "time": "20:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "m68",
+    "group": "L",
+    "homeTeam": "GHA",
+    "awayTeam": "PAN",
+    "date": "2026-06-17",
+    "time": "23:00:00Z",
+    "stadium": "BMO Field"
+  },
+  {
+    "id": "m69",
+    "group": "L",
+    "homeTeam": "ENG",
+    "awayTeam": "GHA",
+    "date": "2026-06-23",
+    "time": "20:00:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "m70",
+    "group": "L",
+    "homeTeam": "PAN",
+    "awayTeam": "CRO",
+    "date": "2026-06-23",
+    "time": "23:00:00Z",
+    "stadium": "BMO Field"
+  },
+  {
+    "id": "m71",
+    "group": "L",
+    "homeTeam": "PAN",
+    "awayTeam": "ENG",
+    "date": "2026-06-27",
+    "time": "21:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "m72",
+    "group": "L",
+    "homeTeam": "CRO",
+    "awayTeam": "GHA",
+    "date": "2026-06-27",
+    "time": "21:00:00Z",
+    "stadium": "Lincoln Financial Field"
+  },
+  {
+    "id": "k1",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-06-28",
+    "time": "19:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "k2",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-06-29",
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "k3",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-06-29",
+    "time": "20:30:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "k4",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-06-30",
+    "time": "01:00:00Z",
+    "stadium": "Estadio BBVA"
+  },
+  {
+    "id": "k5",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-06-30",
+    "time": "17:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "k6",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-06-30",
+    "time": "21:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "k7",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-01",
+    "time": "01:00:00Z",
+    "stadium": "Estadio Azteca"
+  },
+  {
+    "id": "k8",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-01",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "k9",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-01",
+    "time": "20:00:00Z",
+    "stadium": "Lumen Field"
+  },
+  {
+    "id": "k10",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-02",
+    "time": "00:00:00Z",
+    "stadium": "Levi's Stadium"
+  },
+  {
+    "id": "k11",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-02",
+    "time": "19:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "k12",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-02",
+    "time": "23:00:00Z",
+    "stadium": "BMO Field"
+  },
+  {
+    "id": "k13",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-03",
+    "time": "03:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "k14",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-03",
+    "time": "18:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "k15",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-03",
+    "time": "22:00:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "k16",
+    "group": "R32",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-03",
+    "time": "01:30:00Z",
+    "stadium": "Arrowhead Stadium"
+  },
+  {
+    "id": "k17",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-04",
+    "time": "17:00:00Z",
+    "stadium": "NRG Stadium"
+  },
+  {
+    "id": "k18",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-04",
+    "time": "21:00:00Z",
+    "stadium": "Lincoln Financial Field"
+  },
+  {
+    "id": "k19",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-05",
+    "time": "20:00:00Z",
+    "stadium": "MetLife Stadium"
+  },
+  {
+    "id": "k20",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-06",
+    "time": "00:00:00Z",
+    "stadium": "Estadio Azteca"
+  },
+  {
+    "id": "k21",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-06",
+    "time": "19:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "k22",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-07",
+    "time": "00:00:00Z",
+    "stadium": "Lumen Field"
+  },
+  {
+    "id": "k23",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-07",
+    "time": "16:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "k24",
+    "group": "R16",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-07",
+    "time": "20:00:00Z",
+    "stadium": "BC Place"
+  },
+  {
+    "id": "k25",
+    "group": "QF",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-09",
+    "time": "20:00:00Z",
+    "stadium": "Gillette Stadium"
+  },
+  {
+    "id": "k26",
+    "group": "QF",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-10",
+    "time": "19:00:00Z",
+    "stadium": "SoFi Stadium"
+  },
+  {
+    "id": "k27",
+    "group": "QF",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-11",
+    "time": "21:00:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "k28",
+    "group": "QF",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-12",
+    "time": "01:00:00Z",
+    "stadium": "Arrowhead Stadium"
+  },
+  {
+    "id": "k29",
+    "group": "SF",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-14",
+    "time": "19:00:00Z",
+    "stadium": "AT&T Stadium"
+  },
+  {
+    "id": "k30",
+    "group": "SF",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-15",
+    "time": "19:00:00Z",
+    "stadium": "Mercedes-Benz Stadium"
+  },
+  {
+    "id": "k31",
+    "group": "3rd",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-18",
+    "time": "21:00:00Z",
+    "stadium": "Hard Rock Stadium"
+  },
+  {
+    "id": "k32",
+    "group": "Final",
+    "homeTeam": "TBD",
+    "awayTeam": "TBD",
+    "date": "2026-07-19",
+    "time": "19:00:00Z",
+    "stadium": "MetLife Stadium"
+  }
+]
