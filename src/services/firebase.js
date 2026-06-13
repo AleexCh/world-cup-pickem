@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, setPersistence, browserSessionPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -13,11 +13,15 @@ const firebaseConfig = {
 
 let app, auth, db, googleProvider;
 
-// Only initialize Firebase if config is provided
 if (firebaseConfig.apiKey) {
   try {
     app = initializeApp(firebaseConfig);
     auth = getAuth(app);
+    
+    // Set persistence to session-only (clears on tab close)
+    setPersistence(auth, browserSessionPersistence)
+      .catch((error) => console.error("Persistence setting failed:", error));
+      
     db = getFirestore(app);
     googleProvider = new GoogleAuthProvider();
   } catch (error) {
