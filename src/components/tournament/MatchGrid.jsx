@@ -103,9 +103,12 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
                   <span className="text-zinc-500">Actual:</span>
                   <span className="font-bold text-zinc-300">{actualMatch.homeScore} - {actualMatch.awayScore}</span>
                 </div>
-                <div className={`font-bold ${pointsEarned > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                  {pointsEarned > 0 ? `+${pointsEarned} pts` : '0 pts'}
-                </div>
+                {/* Only show points if the user is logged in */}
+                  {user && (
+                    <div className={`font-bold ${pointsEarned > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                      {pointsEarned > 0 ? `+${pointsEarned} pts` : '0 pts'}
+                    </div>
+                  )}
               </div>
             )}
 
