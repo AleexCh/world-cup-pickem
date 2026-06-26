@@ -36,7 +36,7 @@ function MatchesPage({ teams, schedule, standings, matchPicks, setMatchPicks, ha
   );
 }
 
-function StandingsPage({ teams, schedule, standings, groupPoints, actualResults }) {
+function StandingsPage({ teams, schedule, standings, groupPoints, actualResults,user }) {
   const groupLetters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'];
   const [showResults, setShowResults] = useState(false);
   
@@ -51,9 +51,32 @@ function StandingsPage({ teams, schedule, standings, groupPoints, actualResults 
   const displayStandings = showResults ? actualStandings : standings;
   
   // Only pass groupPoints when showing user picks, not when showing actual results
-  const shouldShowGroupPoints = !showResults;
+  const shouldShowGroupPoints = !showResults && user;
+
+  const thirdPlaceTeams = React.useMemo(() => {
+  if (!displayStandings) return [];
+  
+  const thirds = [];
+  // Iterate over groups A-L
+  ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'].forEach(group => {
+    const teams = displayStandings[group] || [];
+    // The 3rd index (0, 1, 2) is the 3rd place team
+    if (teams[2]) {
+      thirds.push({ ...teams[2], group });
+    }
+  });
+
+  // Sort: Points, then Goal Difference, then Goals For
+  return thirds.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+    return b.goalsFor - a.goalsFor;
+  });
+}, [displayStandings]);
   
   return (
+
+    
     <>
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -86,8 +109,51 @@ function StandingsPage({ teams, schedule, standings, groupPoints, actualResults 
           />
         ))}
       </div>
+      <div className="mt-8 bg-zinc-900/50 border border-zinc-800 rounded-xl p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-amber-400 mb-4">
+          {showResults ? 'Official Best 3rd Place Teams' : 'My Picks: Best 3rd Place Teams'}
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-zinc-400 border-b border-zinc-700">
+                <th className="text-left py-2">Rank</th>
+                <th className="text-left py-2">Team</th>
+                <th className="text-center py-2">Group</th>
+                <th className="text-center py-2">Played</th>
+                <th className="text-center py-2">Goal Difference</th>
+                <th className="text-center py-2">Goals For</th>
+                <th className="text-center py-2">Points</th>
+                <th className="text-center py-2">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {thirdPlaceTeams.map((team, index) => (
+                <tr key={team.teamId} className={`border-b border-zinc-700/50 ${index < 8 ? 'bg-emerald-900/20' : ''}`}>
+                  <td className="py-2">{index + 1}</td>
+                  <td className="py-2">{team.name}</td>
+                  <td className="text-center py-2">{team.teamId}</td>
+                  <td className="text-center py-2">{team.played}</td>
+                  <td className="text-center py-2">{team.goalDifference}</td>
+                  <td className="text-center py-2">{team.goalsFor}</td>
+                  <td className="text-center py-2 font-bold">{team.points}</td>
+                  <td className="text-center py-2">
+                    {index < 8 ? (
+                      <span className="text-emerald-400 font-bold">QUALIFIED</span>
+                    ) : (
+                      <span className="text-zinc-500">ELIMINATED</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </>
   );
+
+  
 }
 
 function KnockoutMatchesPage({ teams, schedule, matchPicks, setMatchPicks, handleScoreChange, confirmPick }) {
@@ -493,6 +559,7 @@ function AppContent() {
               standings={standings}
               groupPoints={groupPoints}
               actualResults={actualResults}
+              user={user}
             />
           } />
           <Route path="/knockout-matches" element={
