@@ -2,8 +2,8 @@ import React from 'react';
 import { isMatchLocked, formatMatchTime, calculateMatchPoints } from '../../utils/scoringEngine';
 
 export default function KnockoutMatches({ schedule, teams, matchPicks, actualResults, onScoreChange, onConfirmPick }) {
-  // Disable knockout match editing until one day after last group match (June 28, 2026)
-  const knockoutLockDate = new Date('2026-06-28T00:00:00Z');
+  // Disable knockout match editing until last group match day (June 27, 2026)
+  const knockoutLockDate = new Date('2026-06-27T00:00:00Z');
   const isKnockoutLocked = (match) => {
     return new Date() < knockoutLockDate;
   };
@@ -35,7 +35,7 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
     <div>
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 sm:p-3 mb-4">
         <p className="text-amber-400 text-xs sm:text-sm text-center">
-          ⚠️ Knockout stage predictions are locked until June 28, 2026. Matches are locked 1 hour before kickoff!
+          ⚠️ Knockout stage predictions are locked until June 27, 2026. Matches are locked 1 hour before kickoff!
         </p>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:gap-4">
@@ -68,7 +68,7 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
                 <span className="text-zinc-500 normal-case">{formatMatchDate(match)}</span>
               </div>
               <span className={(locked || knockoutLocked) ? 'text-amber-500' : matchCompleted ? 'text-emerald-400' : ''}>
-                {matchCompleted ? 'Final' : locked ? 'Locked' : knockoutLocked ? 'Locked (Until June 28)' : matchTime}
+                {matchCompleted ? 'Final' : locked ? 'Locked' : knockoutLocked ? 'Locked (Until June 27)' : matchTime}
               </span>
             </div>
 

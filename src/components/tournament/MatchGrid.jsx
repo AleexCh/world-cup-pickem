@@ -56,7 +56,7 @@ export default function MatchGrid({ schedule, teams, matchPicks, actualResults, 
               </div>
 
               <div className="flex items-center gap-2 justify-center w-[16%]">
-                {matchCompleted ? (
+                {matchCompleted && user ? (
                   <div className="flex items-center gap-2">
                     <span className={`w-12 h-12 sm:w-10 sm:h-10 flex items-center justify-center border rounded-lg font-bold ${pick.homeScore == actualMatch.homeScore && pick.awayScore == actualMatch.awayScore ? 'bg-emerald-600/30 border-emerald-500 text-emerald-300' : 'bg-zinc-800/50 border-zinc-700 text-zinc-400'}`}>
                       {pick.homeScore}
