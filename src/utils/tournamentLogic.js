@@ -171,24 +171,44 @@ export function mapKnockoutTeams(standings, schedule) {
     return groupTeams && groupTeams[position - 1] ? groupTeams[position - 1].teamId : 'TBD';
   };
   
-  // Map Round of 32 matches
+  // Helper to get best 3rd place team from specific group combinations
+  const getBest3rdPlace = (groups) => {
+    const thirdPlaceTeams = [];
+    groups.forEach(group => {
+      const groupTeams = groupStandings[group];
+      if (groupTeams && groupTeams[2]) {
+        thirdPlaceTeams.push(groupTeams[2]);
+      }
+    });
+    
+    // Sort by FIFA tiebreakers: points, goal difference, goals scored
+    thirdPlaceTeams.sort((a, b) => {
+      if (b.points !== a.points) return b.points - a.points;
+      if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+      return b.goalsFor - a.goalsFor;
+    });
+    
+    return thirdPlaceTeams.length > 0 ? thirdPlaceTeams[0].teamId : 'TBD';
+  };
+  
+  // Map Round of 32 matches (FIFA WC 2026 official rules)
   const r32Mapping = {
-    'k1': { home: () => getTeam('A', 1), away: () => getTeam('B', 2) },
-    'k2': { home: () => getTeam('C', 1), away: () => getTeam('D', 2) },
-    'k3': { home: () => getTeam('E', 1), away: () => getTeam('F', 2) },
-    'k4': { home: () => getTeam('G', 1), away: () => getTeam('H', 2) },
-    'k5': { home: () => getTeam('B', 1), away: () => getTeam('A', 2) },
-    'k6': { home: () => getTeam('D', 1), away: () => getTeam('C', 2) },
-    'k7': { home: () => getTeam('F', 1), away: () => getTeam('E', 2) },
-    'k8': { home: () => getTeam('H', 1), away: () => getTeam('G', 2) },
-    'k9': { home: () => getTeam('I', 1), away: () => getTeam('J', 2) },
-    'k10': { home: () => getTeam('K', 1), away: () => getTeam('L', 2) },
-    'k11': { home: () => getTeam('J', 1), away: () => getTeam('I', 2) },
-    'k12': { home: () => getTeam('L', 1), away: () => getTeam('K', 2) },
-    'k13': { home: () => getTeam('A', 3), away: () => getTeam('B', 3) },
-    'k14': { home: () => getTeam('C', 3), away: () => getTeam('D', 3) },
-    'k15': { home: () => getTeam('E', 3), away: () => getTeam('F', 3) },
-    'k16': { home: () => getTeam('G', 3), away: () => getTeam('H', 3) },
+    'k1': { home: () => getTeam('A', 2), away: () => getTeam('B', 2) },
+    'k2': { home: () => getTeam('E', 1), away: () => getBest3rdPlace(['A', 'B', 'C', 'D', 'F']) },
+    'k3': { home: () => getTeam('F', 1), away: () => getTeam('C', 2) },
+    'k4': { home: () => getTeam('C', 1), away: () => getTeam('F', 2) },
+    'k5': { home: () => getTeam('I', 1), away: () => getBest3rdPlace(['C', 'D', 'F', 'G', 'H']) },
+    'k6': { home: () => getTeam('E', 2), away: () => getTeam('I', 2) },
+    'k7': { home: () => getTeam('A', 1), away: () => getBest3rdPlace(['C', 'E', 'F', 'H', 'I']) },
+    'k8': { home: () => getTeam('L', 1), away: () => getBest3rdPlace(['E', 'H', 'I', 'J', 'K']) },
+    'k9': { home: () => getTeam('D', 1), away: () => getBest3rdPlace(['B', 'E', 'F', 'I', 'J']) },
+    'k10': { home: () => getTeam('G', 1), away: () => getBest3rdPlace(['A', 'E', 'H', 'I', 'J']) },
+    'k11': { home: () => getTeam('K', 2), away: () => getTeam('L', 2) },
+    'k12': { home: () => getTeam('H', 1), away: () => getTeam('J', 2) },
+    'k13': { home: () => getTeam('B', 1), away: () => getBest3rdPlace(['E', 'F', 'G', 'I', 'J']) },
+    'k14': { home: () => getTeam('J', 1), away: () => getTeam('H', 2) },
+    'k15': { home: () => getTeam('K', 1), away: () => getBest3rdPlace(['D', 'E', 'I', 'J', 'L']) },
+    'k16': { home: () => getTeam('D', 2), away: () => getTeam('G', 2) },
   };
   
   // Update knockout schedule with actual teams
