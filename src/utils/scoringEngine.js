@@ -172,9 +172,9 @@ export function calculateGroupStandingPoints(userStandings, actualStandings, sch
 
 /**
  * Calculates points earned for a single match prediction
- * @param {Object} userMatch - User's prediction { homeScore, awayScore }
- * @param {Object} actualMatch - Actual result { homeScore, awayScore }
- * @returns {number} Points earned for this match (0, 10, or 25)
+ * @param {Object} userMatch - User's prediction { homeScore, awayScore, homePenaltyScore, awayPenaltyScore }
+ * @param {Object} actualMatch - Actual result { homeScore, awayScore, homePenaltyScore, awayPenaltyScore }
+ * @returns {number} Points earned for this match (0, 10, 25, or 35 with penalty)
  */
 export function calculateMatchPoints(userMatch, actualMatch) {
   if (!userMatch || !actualMatch) return 0;
@@ -197,6 +197,23 @@ export function calculateMatchPoints(userMatch, actualMatch) {
     // Exact Score Bonus Check
     if (uHome === aHome && uAway === aAway) {
       points += 15;
+    }
+  }
+
+  // Penalty Shootout Bonus (only for knockout matches that went to penalties)
+  const uHomePenalty = userMatch.homePenaltyScore ? parseInt(userMatch.homePenaltyScore, 5) : null;
+  const uAwayPenalty = userMatch.awayPenaltyScore ? parseInt(userMatch.awayPenaltyScore, 5) : null;
+  const aHomePenalty = actualMatch.homePenaltyScore ? parseInt(actualMatch.homePenaltyScore, 5) : null;
+  const aAwayPenalty = actualMatch.awayPenaltyScore ? parseInt(actualMatch.awayPenaltyScore, 5) : null;
+
+  // If match went to penalties (draw in regular time)
+  if (aHome === aAway && aHomePenalty !== null && aAwayPenalty !== null) {
+    // User predicted it would go to penalties
+    if (uHome === uAway && uHomePenalty !== null && uAwayPenalty !== null) {
+      // Check if user predicted exact penalty score
+      if (uHomePenalty === aHomePenalty && uAwayPenalty === aAwayPenalty) {
+        points += 10; // Bonus for exact penalty score
+      }
     }
   }
 

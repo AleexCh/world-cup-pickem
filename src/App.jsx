@@ -156,22 +156,24 @@ function StandingsPage({ teams, schedule, standings, groupPoints, actualResults,
   
 }
 
-function KnockoutMatchesPage({ teams, schedule, matchPicks, setMatchPicks, handleScoreChange, confirmPick }) {
+function KnockoutMatchesPage({ teams, schedule, matchPicks, setMatchPicks, handleScoreChange, confirmPick, actualResults,user }) {
   return (
     <>
       <KnockoutMatches
         teams={teams}
         schedule={schedule}
+        actualResults={actualResults}
         matchPicks={matchPicks}
         setMatchPicks={setMatchPicks}
         onScoreChange={handleScoreChange}
-        onConfirm={confirmPick}
+        onConfirmPick={confirmPick}
+        user={user}
       />
     </>
   );
 }
 
-function KnockoutBracketPage({ knockoutPicks, setKnockoutPicks, teams, onConfirm, schedule, matchPicks, actualResults, isAdmin }) {
+function KnockoutBracketPage({ knockoutPicks, setKnockoutPicks, teams, onConfirm, schedule, matchPicks, actualResults, isAdmin,knockoutTeams }) {
   return (
     <>
       <KnockoutBracket
@@ -183,6 +185,7 @@ function KnockoutBracketPage({ knockoutPicks, setKnockoutPicks, teams, onConfirm
         matchPicks={matchPicks}
         actualResults={actualResults}
         isAdmin={isAdmin}
+        knockoutTeams={knockoutTeams}
       />
     </>
   );
@@ -569,6 +572,8 @@ function AppContent() {
               matchPicks={matchPicks}
               setMatchPicks={setMatchPicks}
               handleScoreChange={handleScoreChange}
+              actualResults={actualResults}
+              user={user}
               confirmPick={confirmPick}
             />
           } />
@@ -583,6 +588,7 @@ function AppContent() {
                 matchPicks={matchPicks}
                 actualResults={actualResults}
                 isAdmin={isAdmin}
+                knockoutTeams={knockoutTeams}
               />
             ) : (
               <Navigate to="/matches" replace />

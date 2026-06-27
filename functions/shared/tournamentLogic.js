@@ -1,6 +1,6 @@
 /**
  * Computes group tables (points, goal differential, goals scored) from user predictions.
- * @param {Object} matchPicks - User's match predictions { matchId: { homeScore, awayScore } }
+ * @param {Object} matchPicks - User's match predictions { matchId: { homeScore, awayScore, homePenaltyScore, awayPenaltyScore } }
  * @param {Array} schedule - Static match schedule list
  * @param {Object} teams - Static teams mapping
  * @returns {Object} Group standings dictionary organized by group letter
@@ -25,8 +25,11 @@ export function calculateStandings(matchPicks, schedule, teams) {
     };
   });
 
-  // Process completed pick matches
+  // Process completed pick matches (only group stage matches)
   schedule.forEach((match) => {
+    // Skip knockout matches - only process group stage (A-L)
+    if (!match.group || !match.group.match(/^[A-L]$/)) return;
+
     const pick = matchPicks[match.id];
     if (!pick || pick.homeScore === null || pick.awayScore === null || pick.homeScore === undefined || pick.awayScore === undefined) return;
 
@@ -134,6 +137,26 @@ export function allGroupMatchesScored(actualResults, schedule) {
 }
 
 /**
+ * Checks if a specific group has completed all its matches.
+ * @param {string} groupLetter - Group letter (A-L)
+ * @param {Object} actualResults - Actual match results from admin
+ * @param {Array} schedule - Match schedule
+ * @returns {boolean} True if all matches in the group are scored
+ */
+export function isGroupComplete(groupLetter, actualResults, schedule) {
+  const groupSchedule = schedule.filter(match => match.group === groupLetter);
+  
+  for (const match of groupSchedule) {
+    const result = actualResults[match.id];
+    if (!result || result.homeScore === null || result.awayScore === null || 
+        result.homeScore === undefined || result.awayScore === undefined) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Calculates group standings from actual results (not user predictions).
  * @param {Object} actualResults - Actual match results from admin
  * @param {Array} schedule - Match schedule
@@ -148,9 +171,11 @@ export function calculateActualStandings(actualResults, schedule, teams) {
  * Maps advancing teams to knockout stage matches.
  * @param {Object} standings - Group standings
  * @param {Array} schedule - Full schedule including knockout
+ * @param {Object} actualResults - Actual match results from admin
  * @returns {Object} Updated knockout schedule with team IDs
  */
-export function mapKnockoutTeams(standings, schedule) {
+export function mapKnockoutTeams(standings, schedule, actualResults) {
+  const assignedTeams = new Set();
   const knockoutSchedule = schedule.filter(match => match.group && !match.group.match(/^[A-L]$/));
   const advancing = determineAdvancingTeams(standings);
   
@@ -165,31 +190,85 @@ export function mapKnockoutTeams(standings, schedule) {
   
   const teamMap = {};
   
-  // Helper to get team by position in group
+  // Helper to get team by position in group, only if group is complete
   const getTeam = (group, position) => {
+    if (!isGroupComplete(group, actualResults, schedule)) {
+      return 'TBD';
+    }
     const groupTeams = groupStandings[group];
     return groupTeams && groupTeams[position - 1] ? groupTeams[position - 1].teamId : 'TBD';
   };
   
-  // Map Round of 32 matches
-  const r32Mapping = {
-    'k1': { home: () => getTeam('A', 1), away: () => getTeam('B', 2) },
-    'k2': { home: () => getTeam('C', 1), away: () => getTeam('D', 2) },
-    'k3': { home: () => getTeam('E', 1), away: () => getTeam('F', 2) },
-    'k4': { home: () => getTeam('G', 1), away: () => getTeam('H', 2) },
-    'k5': { home: () => getTeam('B', 1), away: () => getTeam('A', 2) },
-    'k6': { home: () => getTeam('D', 1), away: () => getTeam('C', 2) },
-    'k7': { home: () => getTeam('F', 1), away: () => getTeam('E', 2) },
-    'k8': { home: () => getTeam('H', 1), away: () => getTeam('G', 2) },
-    'k9': { home: () => getTeam('I', 1), away: () => getTeam('J', 2) },
-    'k10': { home: () => getTeam('K', 1), away: () => getTeam('L', 2) },
-    'k11': { home: () => getTeam('J', 1), away: () => getTeam('I', 2) },
-    'k12': { home: () => getTeam('L', 1), away: () => getTeam('K', 2) },
-    'k13': { home: () => getTeam('A', 3), away: () => getTeam('B', 3) },
-    'k14': { home: () => getTeam('C', 3), away: () => getTeam('D', 3) },
-    'k15': { home: () => getTeam('E', 3), away: () => getTeam('F', 3) },
-    'k16': { home: () => getTeam('G', 3), away: () => getTeam('H', 3) },
+  // Helper to get best 3rd place team from specific group combinations
+  const getBest3rdPlace = (groups) => {
+    const candidates = groups
+      .map(g => standings[g]?.[2])
+      .filter(t => t && !assignedTeams.has(t.teamId) && isGroupComplete(t.group, actualResults, schedule));
+    
+    candidates.sort((a, b) => (b.points - a.points) || (b.goalDifference - a.goalDifference) || (b.goalsFor - a.goalsFor));
+    
+    if (candidates.length > 0) {
+      assignedTeams.add(candidates[0].teamId);
+      return candidates[0].teamId;
+    }
+    return 'TBD';
   };
+  
+  // Map Round of 32 matches (FIFA WC 2026 official rules)
+  // const r32Mapping = {
+  //   'k1': { home: () => getTeam('A', 2), away: () => getTeam('B', 2) },
+  //   'k2': { home: () => getTeam('E', 1), away: () => getBest3rdPlace(['A', 'B', 'C', 'D', 'F']) },
+  //   'k3': { home: () => getTeam('F', 1), away: () => getTeam('C', 2) },
+  //   'k4': { home: () => getTeam('C', 1), away: () => getTeam('F', 2) },
+  //   'k5': { home: () => getTeam('I', 1), away: () => getBest3rdPlace(['C', 'D', 'F', 'G', 'H']) },
+  //   'k6': { home: () => getTeam('E', 2), away: () => getTeam('I', 2) },
+  //   'k7': { home: () => getTeam('A', 1), away: () => getBest3rdPlace(['C', 'E', 'F', 'H', 'I']) },
+  //   'k8': { home: () => getTeam('L', 1), away: () => getBest3rdPlace(['E', 'H', 'I', 'J', 'K']) },
+  //   'k9': { home: () => getTeam('D', 1), away: () => getBest3rdPlace(['B', 'E', 'F', 'I', 'J']) },
+  //   'k10': { home: () => getTeam('G', 1), away: () => getBest3rdPlace(['A', 'E', 'H', 'I', 'J']) },
+  //   'k11': { home: () => getTeam('K', 2), away: () => getTeam('L', 2) },
+  //   'k12': { home: () => getTeam('H', 1), away: () => getTeam('J', 2) },
+  //   'k13': { home: () => getTeam('B', 1), away: () => getBest3rdPlace(['E', 'F', 'G', 'I', 'J']) },
+  //   'k14': { home: () => getTeam('J', 1), away: () => getTeam('H', 2) },
+  //   'k15': { home: () => getTeam('K', 1), away: () => getBest3rdPlace(['D', 'E', 'I', 'J', 'L']) },
+  //   'k16': { home: () => getTeam('D', 2), away: () => getTeam('G', 2) },
+  // };
+
+  // Hard coding the mapping because we need it so that the bracket SingleEliminationBracket log matches. The mapping now shuffles FIFA requirements into the UI's connected slots
+  const r32Mapping = {
+  // "official k2 vs k5"
+  'k1': { home: () => getTeam('E', 1), away: () => getBest3rdPlace(['A', 'B', 'C', 'D', 'F']) },
+  'k2': { home: () => getTeam('I', 1), away: () => getBest3rdPlace(['C', 'D', 'F', 'G', 'H']) },
+
+  // official k1 vs k3
+  'k3': { home: () => getTeam('A', 2), away: () => getTeam('B', 2) },
+  'k4': { home: () => getTeam('F', 1), away: () => getTeam('C', 2) },
+  
+  // official k11 vs k12
+  'k5': { home: () => getTeam('K', 2), away: () => getTeam('L', 2) },
+  'k6': { home: () => getTeam('H', 1), away: () => getTeam('J', 2) },
+
+  // official k9 vs k10
+  'k7':  { home: () => getTeam('D', 1), away: () => getBest3rdPlace(['B', 'E', 'F', 'I', 'J']) },
+  'k8': { home: () => getTeam('G', 1), away: () => getBest3rdPlace(['A', 'E', 'H', 'I', 'J']) },
+
+  // official k 4 vs k6
+  'k9': { home: () => getTeam('C', 1), away: () => getTeam('F', 2) },
+  'k10': { home: () => getTeam('E', 2), away: () => getTeam('I', 2) },
+
+  // official k7 and k8
+  'k11': { home: () => getTeam('A', 1), away: () => getBest3rdPlace(['C', 'E', 'F', 'H', 'I']) },
+  'k12': { home: () => getTeam('L', 1), away: () => getBest3rdPlace(['E', 'H', 'I', 'J', 'K']) },
+
+  // official k14 and k16
+  'k13': { home: () => getTeam('J', 1), away: () => getTeam('H', 2) },
+  'k14': { home: () => getTeam('D', 2), away: () => getTeam('G', 2) },
+
+  // official k13 vs k15
+  'k15': { home: () => getTeam('B', 1), away: () => getBest3rdPlace(['E', 'F', 'G', 'I', 'J']) },
+  'k16': { home: () => getTeam('K', 1), away: () => getBest3rdPlace(['D', 'E', 'I', 'J', 'L']) },
+  
+};
   
   // Update knockout schedule with actual teams
   const updatedSchedule = schedule.map(match => {

@@ -1,12 +1,15 @@
 import React from 'react';
 import { isMatchLocked, formatMatchTime, calculateMatchPoints } from '../../utils/scoringEngine';
 
-export default function KnockoutMatches({ schedule, teams, matchPicks, actualResults, onScoreChange, onConfirmPick }) {
+export default function KnockoutMatches({ schedule, teams, matchPicks, actualResults, onScoreChange, onConfirmPick, user }) {
   // Disable knockout match editing until last group match day (June 27, 2026)
   const knockoutLockDate = new Date('2026-06-27T00:00:00Z');
   const isKnockoutLocked = (match) => {
     return new Date() < knockoutLockDate;
   };
+
+  // State for penalty popup
+  const [penaltyPopupMatch, setPenaltyPopupMatch] = React.useState(null);
 
   // Sort matches by date and time
   const sortedSchedule = React.useMemo(() => {
@@ -35,14 +38,14 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
     <div>
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 sm:p-3 mb-4">
         <p className="text-amber-400 text-xs sm:text-sm text-center">
-          ⚠️ Knockout stage predictions are locked until June 27, 2026. Matches are locked 1 hour before kickoff!
+          ⚠️ Matches are locked 1 hour before kickoff. Confirm your predictions before then!
         </p>
       </div>
       <div className="grid grid-cols-1 gap-3 sm:gap-4">
       {sortedSchedule.map((match) => {
         const home = teams[match.homeTeam];
         const away = teams[match.awayTeam];
-        const pick = matchPicks[match.id] || { homeScore: '', awayScore: '', confirmed: false };
+        const pick = matchPicks[match.id] || { homeScore: '', awayScore: '', homePenaltyScore: '', awayPenaltyScore: '', confirmed: false };
         const locked = isMatchLocked(match);
         const knockoutLocked = isKnockoutLocked(match);
         const matchTime = formatMatchTime(match);
@@ -51,21 +54,32 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
         const actualMatch = actualResults?.matchPicks?.[match.id];
         const matchCompleted = actualMatch && actualMatch.homeScore !== null && actualMatch.awayScore !== null;
         const pointsEarned = matchCompleted ? calculateMatchPoints(pick, actualMatch) : 0;
+        
+        // Check if user predicted a draw (for penalty prediction)
+        const isDrawPrediction = pick.homeScore !== '' && pick.awayScore !== '' && 
+                               parseInt(pick.homeScore) === parseInt(pick.awayScore);
+        
+        // Check if actual match went to penalties
+        const isActualPenalties = matchCompleted && actualMatch.homeScore === actualMatch.awayScore && 
+                                 (actualMatch.homePenaltyScore || actualMatch.awayPenaltyScore);
 
         return (
-          <div key={match.id} className={`bg-zinc-900/80 border p-3 sm:p-4 rounded-xl flex flex-col justify-between transition-all ${
-            matchCompleted 
-              ? (pointsEarned > 0 
-                  ? 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
-                  : 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]')
-              : (locked || knockoutLocked)
-                  ? 'border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)] opacity-80'
-                  : 'border-zinc-800 hover:border-amber-500/50 hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 hover:bg-zinc-800/90 cursor-pointer'
-          }`}>
+          <div key={match.id} className={`bg-zinc-900/80 p-3 sm:p-4 rounded-xl flex flex-col justify-between transition-all ${
+              !user 
+                ? 'border-none' 
+                : `border ${
+                    matchCompleted 
+                      ? (pointsEarned > 0 
+                          ? 'border-emerald-500/50 shadow-[0_0_20px_rgba(16,185,129,0.4)]' 
+                          : 'border-red-500/50 shadow-[0_0_15px_rgba(239,68,68,0.3)]')
+                      : (locked || knockoutLocked)
+                          ? 'border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)] opacity-80'
+                          : 'border-zinc-800 hover:border-amber-500/50 hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:-translate-y-0.5 hover:bg-zinc-800/90 cursor-pointer'
+                  }`
+            }`}>
             <div className="text-[10px] sm:text-xs text-zinc-400 uppercase tracking-widest font-semibold mb-2 flex justify-between">
               <div className="flex flex-col">
-                <span>{match.group || 'Knockout'}</span>
-                <span className="text-zinc-500 normal-case">{formatMatchDate(match)}</span>
+                <span>{match.group || 'Knockout'}</span> 
               </div>
               <span className={(locked || knockoutLocked) ? 'text-amber-500' : matchCompleted ? 'text-emerald-400' : ''}>
                 {matchCompleted ? 'Final' : locked ? 'Locked' : knockoutLocked ? 'Locked (Until June 27)' : matchTime}
@@ -119,12 +133,16 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
                 <span className="text-xl sm:text-2xl">{away?.flag || '🏴'}</span>
               </div>
             </div>
-
-            {matchCompleted && (
+    
+            {matchCompleted && user && (
               <div className="mt-2 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <span className="text-zinc-500">Actual:</span>
-                  <span className="font-bold text-zinc-300">{actualMatch.homeScore} - {actualMatch.awayScore}</span>
+                  <span className="font-bold text-zinc-300">
+                    {actualMatch.homeScore === actualMatch.awayScore && (actualMatch.homePenaltyScore || actualMatch.awayPenaltyScore)
+                      ? `${actualMatch.homeScore} (${actualMatch.homePenaltyScore || 0}) - ${actualMatch.awayScore} (${actualMatch.awayPenaltyScore || 0})`
+                      : `${actualMatch.homeScore} - ${actualMatch.awayScore}`}
+                  </span>
                 </div>
                 <div className={`font-bold ${pointsEarned > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
                   {pointsEarned > 0 ? `+${pointsEarned} pts` : '0 pts'}
@@ -132,13 +150,25 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
               </div>
             )}
 
-            {!locked && !knockoutLocked && !pick.confirmed && pick.homeScore !== '' && pick.awayScore !== '' && (
-              <button
-                onClick={() => onConfirmPick(match.id)}
-                className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"
-              >
-                Confirm Prediction
-              </button>
+            {!locked && !knockoutLocked && !pick.confirmed && pick.homeScore !== '' && pick.awayScore !== '' && user &&(
+              <>
+                {isDrawPrediction && user &&(
+                  <button
+                    onClick={() => setPenaltyPopupMatch(match)}
+                    className="mt-3 w-full py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold rounded-lg transition-all"
+                  >
+                    {pick.homePenaltyScore && pick.awayPenaltyScore 
+                      ? `Penalties: ${pick.homePenaltyScore} - ${pick.awayPenaltyScore}` 
+                      : 'Predict Penalties'}
+                  </button>
+                )}
+                <button
+                  onClick={() => onConfirmPick(match.id)}
+                  className="mt-3 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-all"
+                >
+                  Confirm Prediction
+                </button>
+              </>
             )}
 
             {pick.confirmed && !matchCompleted && (
@@ -153,6 +183,58 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
         );
       })}
       </div>
+
+      {/* Penalty Popup Modal */}
+      {penaltyPopupMatch && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+          <div className="bg-zinc-900 border border-zinc-700 rounded-xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-bold text-white mb-4">Predict Penalty Shootout</h3>
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <div className="text-center">
+                <div className="text-2xl mb-2">{teams[penaltyPopupMatch.homeTeam]?.flag}</div>
+                <div className="text-sm text-zinc-400 mb-2">{teams[penaltyPopupMatch.homeTeam]?.name}</div>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  placeholder="-"
+                  value={matchPicks[penaltyPopupMatch.id]?.homePenaltyScore ?? ''}
+                  onChange={(e) => onScoreChange(penaltyPopupMatch.id, 'homePenaltyScore', e.target.value)}
+                  className="w-16 h-12 text-center bg-zinc-800 border border-zinc-600 rounded-lg text-white font-bold text-xl focus:outline-none focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+              <div className="text-2xl font-bold text-zinc-500">:</div>
+              <div className="text-center">
+                <div className="text-2xl mb-2">{teams[penaltyPopupMatch.awayTeam]?.flag}</div>
+                <div className="text-sm text-zinc-400 mb-2">{teams[penaltyPopupMatch.awayTeam]?.name}</div>
+                <input
+                  type="number"
+                  min="0"
+                  max="10"
+                  placeholder="-"
+                  value={matchPicks[penaltyPopupMatch.id]?.awayPenaltyScore ?? ''}
+                  onChange={(e) => onScoreChange(penaltyPopupMatch.id, 'awayPenaltyScore', e.target.value)}
+                  className="w-16 h-12 text-center bg-zinc-800 border border-zinc-600 rounded-lg text-white font-bold text-xl focus:outline-none focus:ring-2 focus:ring-amber-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPenaltyPopupMatch(null)}
+                className="flex-1 py-2 bg-zinc-700 hover:bg-zinc-600 text-white font-bold rounded-lg transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setPenaltyPopupMatch(null)}
+                className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg transition-all"
+              >
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
