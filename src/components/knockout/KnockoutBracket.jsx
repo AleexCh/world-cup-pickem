@@ -227,10 +227,6 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
   return { matches };
 }, [knockoutTeams, teams]);// Only re-run if these change
 
-  // Calculate zoom based on screen size
-  const dynamicZoom = useMemo(() => {
-    return isMobile ? 0.6 : 1.0;
-  }, [isMobile]);
 
   // Drag-to-scroll handlers
   const handleMouseDown = (e) => {
@@ -434,7 +430,6 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
       >
         <div 
           style={{
-            transform: `scale(${dynamicZoom})`,
             transformOrigin: 'top left',
             overflow: 'visible', 
             display: 'inline-block',
@@ -462,9 +457,9 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
             <SVGViewer
               background={DarkTheme.svgBackground}
               SVGBackground={DarkTheme.svgBackground}
-              width={2500}
-              height={4000}
-              viewBox="0 0 2500 2000"
+              width={isMobile ? 2500 : 2500} 
+              height={isMobile ? 4000 : 4000} // 4000 * 0.6 = 2400
+              viewBox={`0 0 ${isMobile ? 1500 : 2500} ${isMobile ? 2400 : 4000}`}
               {...props}
             >
               {children}
