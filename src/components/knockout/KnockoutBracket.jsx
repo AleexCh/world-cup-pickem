@@ -364,12 +364,8 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
   const CustomMatch = ({ match, onMatchClick, onPartyClick }) => {
     const topTeam = match.participants[0];
     const bottomTeam = match.participants[1];
-    // LOG: Check the specific key and the full object
-  console.log("DEBUG: Checking match ID:", match.id);
-  console.log("DEBUG: Full scores object:", actualResults.matchPicks[match.id]);
     // Use knockout match scores from admin panel
     const matchScores = knockoutMatchScores[match.id] || { homeScore: '', awayScore: '' };
-    console.log("DEBUG: matchScores for match", match.id, ":", matchScores);
     
     // Determine winner based on scores
     const homeScore = parseInt(matchScores.homeScore) || 0;
