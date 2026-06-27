@@ -246,9 +246,9 @@ function AppContent() {
       { to: '/knockout-matches', label: 'Knockout Matches', color: 'amber' },
     ];
     
-    if (allGroupMatchesCompleted || isAdmin) {
-      items.push({ to: '/knockout-bracket', label: 'Knockout Bracket', color: 'amber' });
-    }
+    
+    items.push({ to: '/knockout-bracket', label: 'Knockout Bracket', color: 'amber' });
+   
     
     items.push({ to: '/leaderboard', label: 'Leaderboard', color: 'amber' });
     
@@ -578,7 +578,6 @@ function AppContent() {
             />
           } />
           <Route path="/knockout-bracket" element={
-            (allGroupMatchesCompleted || isAdmin) ? (
               <KnockoutBracketPage
                 knockoutPicks={knockoutPicks}
                 setKnockoutPicks={setKnockoutPicks}
@@ -590,9 +589,6 @@ function AppContent() {
                 isAdmin={isAdmin}
                 knockoutTeams={knockoutTeams}
               />
-            ) : (
-              <Navigate to="/matches" replace />
-            )
           } />
           <Route path="/leaderboard" element={<LeaderboardPage user={user} />} />
           <Route path="/profile" element={

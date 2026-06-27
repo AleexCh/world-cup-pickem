@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { SingleEliminationBracket, Match, SVGViewer, createTheme } from '@g-loot/react-tournament-brackets';
 import styled from 'styled-components';
 import { mapKnockoutTeams, calculateStandings } from '../../utils/tournamentLogic';
+import { db } from '../../services/firebase';
+import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 const DarkTheme = createTheme({
   textColor: { main: '#fafafa', highlighted: '#f59e0b', dark: '#a1a1aa' },
@@ -30,22 +32,33 @@ const MatchWrapper = styled.div`
   transition: background-color 0.2s;
   background-color: #18181b;
   border: 1px solid #3f3f46;
+
+  @media (max-width: 768px) {
+    gap: 2px;
+    padding: 4px;
+  }
 `;
 
 const Participant = styled.div`
   padding: 6px 10px;
-  background-color: ${props => props.$isWinner ? '#f59e0b' : props.$isEmpty ? '#18181b' : '#27272a'};
-  color: ${props => props.$isWinner ? '#fafafa' : props.$isEmpty ? '#52525b' : '#a1a1aa'};
+  background-color: ${props => props.$isWinner ? '#f59e0b' : '#27272a'};
+  color: ${props => props.$isWinner ? '#fafafa' : '#a1a1aa'};
   border-radius: 4px;
   font-size: 11px;
   font-weight: ${props => props.$isWinner ? '600' : '400'};
   cursor: ${props => props.$isClickable ? 'pointer' : 'default'};
-  border: 2px solid ${props => props.$isWinner ? '#d97706' : props.$isEmpty ? '#27272a' : '#3f3f46'};
+  border: 2px solid ${props => props.$isWinner ? '#d97706' : '#3f3f46'};
   transition: all 0.2s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   position: relative;
+
+  @media (max-width: 768px) {
+    padding: 4px 6px;
+    font-size: 9px;
+    border-width: 1px;
+  }
 
   ${props => props.$isClickable && !props.$isEmpty && `
     &:hover {
@@ -112,116 +125,183 @@ const TeamOption = styled.button`
   }
 `;
 
-export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams, onConfirm, schedule, matchPicks, actualResults, isAdmin }) {
+export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams, onConfirm, schedule, matchPicks, actualResults, isAdmin, knockoutTeams }) {
   const [showConfirmButton, setShowConfirmButton] = useState(false);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [showTeamSelector, setShowTeamSelector] = useState(false);
-  const [adminMode, setAdminMode] = useState(false);
+  const [knockoutMatchScores, setKnockoutMatchScores] = useState({});
+  const [adminKnockoutPicks, setAdminKnockoutPicks] = useState({
+    r32: [], r16: [], qf: [], sf: [], final: [], champion: ''
+  });
+  
+  // Mobile detection for zoom
+  const [isMobile, setIsMobile] = useState(false);
+  
+  // Drag-to-scroll state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [scrollPos, setScrollPos] = useState({ x: 0, y: 0 });
+  const scrollContainerRef = useRef(null);
 
-  // Calculate knockout teams based on group standings
-  const knockoutTeams = useMemo(() => {
-    if (!schedule || !matchPicks) return {};
+  // Detect mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-    // Calculate standings from match picks or actual results
-    const standings = calculateStandings(actualResults || matchPicks, schedule, teams);
-
-    // Map advancing teams to knockout matches
-    const updatedSchedule = mapKnockoutTeams(standings, schedule);
-
-    // Extract knockout match team assignments
-    const knockoutSchedule = updatedSchedule.filter(match => match.group && !match.group.match(/^[A-L]$/));
-    const teamAssignments = {};
-
-    knockoutSchedule.forEach(match => {
-      teamAssignments[match.id] = {
-        homeTeam: match.homeTeam,
-        awayTeam: match.awayTeam
-      };
-    });
-
-    return teamAssignments;
-  }, [schedule, matchPicks, actualResults, teams]);
+  // Load knockout match scores and picks from Firestore
+  useEffect(() => {
+    const loadKnockoutData = async () => {
+      try {
+        const docRef = doc(db, 'actualResults', 'knockoutResults');
+        const docSnap = await getDoc(docRef);
+        
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setKnockoutMatchScores(data.matchScores || {});
+          // Load admin knockout picks separately from user predictions
+          if (data.knockoutPicks) {
+            setAdminKnockoutPicks(data.knockoutPicks);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading knockout data:", error);
+      }
+    };
+    
+    loadKnockoutData();
+  }, []);
 
   // Transform data to match the library's expected format
   const bracketData = useMemo(() => {
-    // Each round has half as many matches as teams
-    const rounds = [
-      { key: 'r32', name: 'Round of 32', matches: 16, roundNumber: 1 },
-      { key: 'r16', name: 'Round of 16', matches: 8, roundNumber: 2 },
-      { key: 'qf', name: 'Quarter-Finals', matches: 4, roundNumber: 3 },
-      { key: 'sf', name: 'Semi-Finals', matches: 2, roundNumber: 4 },
-      { key: 'final', name: 'Finals', matches: 1, roundNumber: 5 },
-    ];
+  const matches = [];
+  
+  // Keep these semantic keys so the library knows how to draw the bracket
+  const rounds = [
+    { key: 'r32', name: 'of 32', matches: 16, startK: 1 },
+    { key: 'r16', name: 'of 16', matches: 8, startK: 17 },
+    { key: 'qf', name: 'Quarter-Finals', matches: 4, startK: 25 },
+    { key: 'sf', name: 'Semi-Finals', matches: 2, startK: 29 },
+    { key: 'final', name: 'Final', matches: 1, startK: 31 },
+  ];
 
-    const matches = [];
+  rounds.forEach((round, roundIndex) => {
+    const nextRound = rounds[roundIndex + 1];
 
-    // Build matches for each round with proper linking for tournament structure
-    rounds.forEach((round, roundIndex) => {
-      const nextRound = rounds[roundIndex + 1];
-      const nextRoundKey = nextRound?.key;
+    for (let i = 0; i < round.matches; i++) {
+      // This calculates the exact 'k' ID from your database
+      const kIndex = round.startK + i;
+      const matchKey = `k${kIndex}`; 
+      
+      const matchData = knockoutTeams?.[matchKey];
 
-      // Create matches in order (this determines left/right positioning)
-      for (let i = 0; i < round.matches; i++) {
-        // Each match has 2 teams, so team indices are i*2 and i*2+1
-        let team1Id = knockoutPicks[round.key]?.[i * 2];
-        let team2Id = knockoutPicks[round.key]?.[i * 2 + 1];
+      const team1Id = matchData?.homeTeam || 'TBD';
+      const team2Id = matchData?.awayTeam || 'TBD';
 
-        // If no user prediction, use knockout teams from group standings for R32
-        if (round.key === 'r32' && (!team1Id || !team2Id) && knockoutTeams[i]) {
-          if (!team1Id) team1Id = knockoutTeams[i].homeTeam;
-          if (!team2Id) team2Id = knockoutTeams[i].awayTeam;
-        }
+      matches.push({
+        // Use the 'k' key as the ID so your logic maps perfectly to Firestore
+        id: matchKey, 
+        // Calculate the next K-index for the connector
+        nextMatchId: nextRound ? `k${nextRound.startK + Math.floor(i / 2)}` : null,
+        tournamentRoundText: round.name,
+        roundNumber: roundIndex + 1,
+        participants: [
+          {
+            id: team1Id,
+            resultText: teams[team1Id] ? `${teams[team1Id].flag} ${teams[team1Id].name}` : team1Id,
+            status: team1Id !== 'TBD' ? 'PLAYED' : 'NOT_PLAYED'
+          },
+          {
+            id: team2Id,
+            resultText: teams[team2Id] ? `${teams[team2Id].flag} ${teams[team2Id].name}` : team2Id,
+            status: team2Id !== 'TBD' ? 'PLAYED' : 'NOT_PLAYED'
+          }
+        ]
+      });
+    }
+  });
 
-        const team1 = teams[team1Id];
-        const team2 = teams[team2Id];
+  return { matches };
+}, [knockoutTeams, teams]);// Only re-run if these change
 
-        const matchId = `${round.key}-${i}`;
+  // Calculate zoom based on screen size
+  const dynamicZoom = useMemo(() => {
+    return isMobile ? 0.6 : 1.0;
+  }, [isMobile]);
 
-        // Calculate next match ID for proper tournament progression
-        let nextMatchId = null;
-        if (nextRoundKey) {
-          // In a tournament bracket, matches 0-7 feed into 0-3, then 0-3 feed into 0-1, etc.
-          const nextMatchIndex = Math.floor(i / 2);
-          nextMatchId = `${nextRoundKey}-${nextMatchIndex}`;
-        }
-
-        // Determine winner for this match
-        let winnerId = null;
-        if (nextRoundKey) {
-          const nextMatchIndex = Math.floor(i / 2);
-          winnerId = knockoutPicks[nextRoundKey]?.[nextMatchIndex * 2] || knockoutPicks[nextRoundKey]?.[nextMatchIndex * 2 + 1];
-        } else if (round.key === 'final') {
-          winnerId = knockoutPicks.champion;
-        }
-
-        matches.push({
-          id: matchId,
-          nextMatchId: nextMatchId,
-          tournamentRoundText: round.name,
-          roundNumber: round.roundNumber,
-          participants: [
-            {
-              id: team1Id || `${matchId}-team1`,
-              resultText: team1 ? `${team1.flag} ${team1.name}` : 'TBD',
-              isWinner: team1Id === winnerId,
-              status: team1Id ? 'PLAYED' : 'NOT_PLAYED'
-            },
-            {
-              id: team2Id || `${matchId}-team2`,
-              resultText: team2 ? `${team2.flag} ${team2.name}` : 'TBD',
-              isWinner: team2Id === winnerId,
-              status: team2Id ? 'PLAYED' : 'NOT_PLAYED'
-            }
-          ]
+  // Drag-to-scroll handlers
+  const handleMouseDown = (e) => {
+    if (e.button === 0) { // Left mouse button
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+      if (scrollContainerRef.current) {
+        setScrollPos({ 
+          x: scrollContainerRef.current.scrollLeft, 
+          y: scrollContainerRef.current.scrollTop 
         });
       }
-    });
+      e.preventDefault();
+    } else if (e.button === 1) { // Middle mouse button
+      setIsDragging(true);
+      setDragStart({ x: e.clientX, y: e.clientY });
+      if (scrollContainerRef.current) {
+        setScrollPos({ 
+          x: scrollContainerRef.current.scrollLeft, 
+          y: scrollContainerRef.current.scrollTop 
+        });
+      }
+      e.preventDefault();
+    }
+  };
 
-    return {
-      matches: matches,
-      currentRound: 'Round of 32'
-    };
-  }, [knockoutPicks, teams, knockoutTeams]);
+  const handleMouseMove = (e) => {
+    if (isDragging && scrollContainerRef.current) {
+      const dx = e.clientX - dragStart.x;
+      const dy = e.clientY - dragStart.y;
+      scrollContainerRef.current.scrollLeft = scrollPos.x - dx;
+      scrollContainerRef.current.scrollTop = scrollPos.y - dy;
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  // Touch handlers for mobile
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      setIsDragging(true);
+      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      if (scrollContainerRef.current) {
+        setScrollPos({ 
+          x: scrollContainerRef.current.scrollLeft, 
+          y: scrollContainerRef.current.scrollTop 
+        });
+      }
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (isDragging && e.touches.length === 1 && scrollContainerRef.current) {
+      const dx = e.touches[0].clientX - dragStart.x;
+      const dy = e.touches[0].clientY - dragStart.y;
+      scrollContainerRef.current.scrollLeft = scrollPos.x - dx;
+      scrollContainerRef.current.scrollTop = scrollPos.y - dy;
+      e.preventDefault();
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+  };
+
 
   const handleMatchClick = (matchId, participantId) => {
     // This function is called when a team is clicked
@@ -235,24 +315,28 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
 
     if (participantIndex === -1) return;
 
-    const teamId = knockoutPicks[roundKey]?.[actualTeamIndex];
+    // Use adminKnockoutPicks when in admin mode
+    const currentPicks = (isAdmin && adminMode) ? adminKnockoutPicks : knockoutPicks;
+    const setPicks = (isAdmin && adminMode) ? setAdminKnockoutPicks : setKnockoutPicks;
+
+    const teamId = currentPicks[roundKey]?.[actualTeamIndex];
     if (!teamId) return;
 
-    // Find next round
-    const rounds = [
-      { key: 'r32', name: 'Round of 32', matches: 16 },
-      { key: 'r16', name: 'Round of 16', matches: 8 },
-      { key: 'qf', name: 'Quarter-Finals', matches: 4 },
-      { key: 'sf', name: 'Semi-Finals', matches: 2 },
-      { key: 'final', name: 'Finals', matches: 1 },
-    ];
+    // Define the rounds and where they start in your Firestore 'k' sequence
+  const rounds = [
+    { key: 'r32', name: 'Round of 32', matches: 16, startK: 1 },
+    { key: 'r16', name: 'Round of 16', matches: 8, startK: 17 },
+    { key: 'qf', name: 'Quarter-Finals', matches: 4, startK: 25 },
+    { key: 'sf', name: 'Semi-Finals', matches: 2, startK: 29 },
+    { key: 'final', name: 'Final', matches: 1, startK: 31 },
+  ];
 
     const roundIndex = rounds.findIndex(r => r.key === roundKey);
     const nextRound = rounds[roundIndex + 1];
 
     // If no next round (final match), update champion
     if (!nextRound) {
-      setKnockoutPicks(prev => ({
+      setPicks(prev => ({
         ...prev,
         champion: teamId
       }));
@@ -263,7 +347,7 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
     const nextMatchIndex = Math.floor(matchIndex / 2);
     const nextTeamIndex = nextMatchIndex * 2; // Winner goes to first position of next match
 
-    setKnockoutPicks(prev => {
+    setPicks(prev => {
       const updatedNextRound = [...(prev[nextRound.key] || [])];
       updatedNextRound[nextTeamIndex] = teamId;
 
@@ -280,6 +364,18 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
   const CustomMatch = ({ match, onMatchClick, onPartyClick }) => {
     const topTeam = match.participants[0];
     const bottomTeam = match.participants[1];
+    // LOG: Check the specific key and the full object
+  console.log("DEBUG: Checking match ID:", match.id);
+  console.log("DEBUG: Full scores object:", actualResults.matchPicks[match.id]);
+    // Use knockout match scores from admin panel
+    const matchScores = knockoutMatchScores[match.id] || { homeScore: '', awayScore: '' };
+    console.log("DEBUG: matchScores for match", match.id, ":", matchScores);
+    
+    // Determine winner based on scores
+    const homeScore = parseInt(matchScores.homeScore) || 0;
+    const awayScore = parseInt(matchScores.awayScore) || 0;
+    const topTeamWins = homeScore > awayScore;
+    const bottomTeamWins = awayScore > homeScore;
 
     return (
       <MatchWrapper>
@@ -288,19 +384,15 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
             e.stopPropagation();
             if (topTeam.status === 'PLAYED') {
               onPartyClick(match, topTeam.id);
-            } else if (isAdmin && adminMode) {
-              setSelectedMatch({ match, participantId: topTeam.id, participantIndex: 0, roundKey: match.id.split('-')[0], matchIndex: parseInt(match.id.split('-')[1]) });
-              setShowTeamSelector(true);
             }
           }}
-          $isWinner={topTeam.isWinner}
-          $isClickable={topTeam.status === 'PLAYED' || (isAdmin && adminMode)}
+          $isWinner={topTeamWins}
+          $isClickable={topTeam.status === 'PLAYED'}
           $isEmpty={topTeam.status === 'NOT_PLAYED'}
         >
           <div className="flex items-center justify-between w-full">
-            <span>{topTeam.resultText}</span>
-            {topTeam.isWinner && <span>✓</span>}
-            {(isAdmin && adminMode && topTeam.status === 'NOT_PLAYED') && <span className="text-amber-400">+</span>}
+            <span className="flex-1">{topTeam.resultText}</span>
+            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.homeScore !== '' ? matchScores.homeScore : '-'}</span>
           </div>
         </Participant>
         <Participant
@@ -308,72 +400,53 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
             e.stopPropagation();
             if (bottomTeam.status === 'PLAYED') {
               onPartyClick(match, bottomTeam.id);
-            } else if (isAdmin && adminMode) {
-              setSelectedMatch({ match, participantId: bottomTeam.id, participantIndex: 1, roundKey: match.id.split('-')[0], matchIndex: parseInt(match.id.split('-')[1]) });
-              setShowTeamSelector(true);
             }
           }}
-          $isWinner={bottomTeam.isWinner}
-          $isClickable={bottomTeam.status === 'PLAYED' || (isAdmin && adminMode)}
+          $isWinner={bottomTeamWins}
+          $isClickable={bottomTeam.status === 'PLAYED'}
           $isEmpty={bottomTeam.status === 'NOT_PLAYED'}
         >
           <div className="flex items-center justify-between w-full">
-            <span>{bottomTeam.resultText}</span>
-            {bottomTeam.isWinner && <span>✓</span>}
-            {(isAdmin && adminMode && bottomTeam.status === 'NOT_PLAYED') && <span className="text-amber-400">+</span>}
+            <span className="flex-1">{bottomTeam.resultText}</span>
+            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.awayScore !== '' ? matchScores.awayScore : '-'}</span>
           </div>
         </Participant>
       </MatchWrapper>
     );
   };
 
-  // Handle admin team selection
-  const handleAdminTeamSelection = (teamId) => {
-    if (!selectedMatch) return;
-
-    const { roundKey, matchIndex, participantIndex } = selectedMatch;
-    const actualTeamIndex = matchIndex * 2 + participantIndex;
-
-    setKnockoutPicks(prev => {
-      const updatedRound = [...(prev[roundKey] || [])];
-      // Ensure array is large enough
-      while (updatedRound.length <= actualTeamIndex) {
-        updatedRound.push(null);
-      }
-      updatedRound[actualTeamIndex] = teamId;
-
-      return {
-        ...prev,
-        [roundKey]: updatedRound
-      };
-    });
-
-    setShowTeamSelector(false);
-    setSelectedMatch(null);
-    setShowConfirmButton(true);
-  };
-
   return (
     <div className="w-full border border-zinc-800 rounded-xl p-4 bg-zinc-950/50">
       {/* Admin mode toggle */}
-      {isAdmin && (
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-amber-400">Admin Controls</h3>
-          <button
-            onClick={() => setAdminMode(!adminMode)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              adminMode
-                ? 'bg-red-600 text-white'
-                : 'bg-amber-600 text-white'
-            }`}
-          >
-            {adminMode ? 'Exit Admin Mode' : 'Enter Admin Mode'}
-          </button>
-        </div>
-      )}
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h3 className="text-sm font-semibold text-amber-400">
+          Bracket Controls
+        </h3>
+      </div>
 
-      <div className="overflow-x-auto">
-        <SingleEliminationBracket
+      <div 
+        ref={scrollContainerRef}
+        className="overflow-auto cursor-grab active:cursor-grabbing"
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseLeave}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        style={{ height: '70vh', touchAction: 'none', userSelect: 'none' }}
+      >
+        <div 
+          style={{
+            transform: `scale(${dynamicZoom})`,
+            transformOrigin: 'top left',
+            overflow: 'visible', 
+            display: 'inline-block',
+            transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+            pointerEvents: 'none'
+          }}
+        >
+          <SingleEliminationBracket
           matches={bracketData.matches}
           matchComponent={CustomMatch}
           theme={DarkTheme}
@@ -386,13 +459,16 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
               connectorColor: DarkTheme.connectorColor,
               connectorColorHighlight: DarkTheme.connectorColorHighlight,
             },
+            disableAutoScroll: true,
+            scrollOnScroll: false,
           }}
           svgWrapper={({ children, ...props }) => (
             <SVGViewer
               background={DarkTheme.svgBackground}
               SVGBackground={DarkTheme.svgBackground}
-              width={2000}
-              height={1000}
+              width={2500}
+              height={4000}
+              viewBox="0 0 2500 2000"
               {...props}
             >
               {children}
@@ -400,44 +476,19 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
           )}
           onPartyClick={(match, participantId) => handleMatchClick(match.id, participantId)}
         />
-
-        {/* Admin Team Selector Modal */}
-        {showTeamSelector && selectedMatch && (
-          <Modal onClick={() => setShowTeamSelector(false)}>
-            <ModalContent onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-lg font-bold text-red-400 mb-4">Admin: Select Team for Slot</h3>
-              <p className="text-xs text-zinc-400 mb-4">
-                {selectedMatch.roundKey.toUpperCase()} - Match {selectedMatch.matchIndex + 1}
-              </p>
-              <div className="space-y-2">
-                {Object.entries(teams).map(([teamId, team]) => (
-                  <TeamOption
-                    key={teamId}
-                    onClick={() => handleAdminTeamSelection(teamId)}
-                  >
-                    <span className="text-xl">{team.flag}</span>
-                    <span className="font-semibold">{team.name}</span>
-                  </TeamOption>
-                ))}
-              </div>
-              <button
-                onClick={() => setShowTeamSelector(false)}
-                className="mt-4 w-full py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-lg transition-colors"
-              >
-                Cancel
-              </button>
-            </ModalContent>
-          </Modal>
-        )}
+        </div>
       </div>
 
       {/* Champion display */}
       <div className="mt-6 pt-6 border-t border-zinc-800 text-center">
         <div className="inline-block">
-          <p className="text-amber-400 text-xs font-bold tracking-widest uppercase mb-3">🏆 Predicted Champion</p>
+          <p className="text-amber-400 text-xs font-bold tracking-widest uppercase mb-3">
+            🏆 Predicted Champion
+          </p>
           <div className="px-8 py-5 bg-gradient-to-b from-amber-500/15 to-amber-600/25 border-2 border-amber-500/50 rounded-2xl shadow-xl">
             <span className="text-xl font-black tracking-wide text-amber-300">
-              {teams[knockoutPicks.champion]?.flag} {teams[knockoutPicks.champion]?.name || "UNDECIDED"}
+              {teams[actualResults?.knockoutResults?.champion]?.flag} 
+              {teams[actualResults?.knockoutResults?.champion]?.name || "UNDECIDED"}
             </span>
           </div>
         </div>
