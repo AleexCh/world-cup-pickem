@@ -156,12 +156,21 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
   useEffect(() => {
     const loadKnockoutData = async () => {
       try {
-        const docRef = doc(db, 'actualResults', 'knockoutResults');
+        const docRef = doc(db, 'actualResults', 'matchResults');
         const docSnap = await getDoc(docRef);
         
         if (docSnap.exists()) {
           const data = docSnap.data();
-          setKnockoutMatchScores(data.matchScores || {});
+          // Filter only knockout match scores (k1, k2, etc.)
+          const knockoutScores = {};
+          if (data.matchPicks) {
+            Object.keys(data.matchPicks).forEach(key => {
+              if (key.startsWith('k')) {
+                knockoutScores[key] = data.matchPicks[key];
+              }
+            });
+          }
+          setKnockoutMatchScores(knockoutScores);
           // Load admin knockout picks separately from user predictions
           if (data.knockoutPicks) {
             setAdminKnockoutPicks(data.knockoutPicks);
@@ -361,11 +370,11 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
     const topTeam = match.participants[0];
     const bottomTeam = match.participants[1];
     // Use knockout match scores from admin panel
-    const matchScores = knockoutMatchScores[match.id] || { homeScore: '', awayScore: '' };
+    const matchScores = knockoutMatchScores[match.id] || { homeScore: null, awayScore: null };
     
     // Determine winner based on scores
-    const homeScore = parseInt(matchScores.homeScore) || 0;
-    const awayScore = parseInt(matchScores.awayScore) || 0;
+    const homeScore = matchScores.homeScore !== null && matchScores.homeScore !== '' ? parseInt(matchScores.homeScore) : null;
+    const awayScore = matchScores.awayScore !== null && matchScores.awayScore !== '' ? parseInt(matchScores.awayScore) : null;
     const topTeamWins = homeScore > awayScore;
     const bottomTeamWins = awayScore > homeScore;
 
@@ -384,7 +393,7 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
         >
           <div className="flex items-center justify-between w-full">
             <span className="flex-1">{topTeam.resultText}</span>
-            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.homeScore !== '' ? matchScores.homeScore : '-'}</span>
+            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.homeScore !== null && matchScores.homeScore !== '' ? matchScores.homeScore : '-'}</span>
           </div>
         </Participant>
         <Participant
@@ -400,7 +409,7 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
         >
           <div className="flex items-center justify-between w-full">
             <span className="flex-1">{bottomTeam.resultText}</span>
-            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.awayScore !== '' ? matchScores.awayScore : '-'}</span>
+            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.awayScore !== null && matchScores.awayScore !== '' ? matchScores.awayScore : '-'}</span>
           </div>
         </Participant>
       </MatchWrapper>

@@ -284,3 +284,88 @@ export function mapKnockoutTeams(standings, schedule, actualResults) {
   
   return updatedSchedule;
 }
+
+/**
+ * Advances winners through knockout stages based on completed matches.
+ * @param {Object} knockoutTeams - Current knockout team assignments { matchId: { homeTeam, awayTeam } }
+ * @param {Object} actualResults - Actual match results from admin
+ * @returns {Object} Updated knockout teams with winners advanced
+ */
+export function advanceKnockoutWinners(knockoutTeams, actualResults) {
+  const updatedTeams = { ...knockoutTeams };
+
+  // Define bracket structure: which matches feed into which next matches
+  const bracketStructure = {
+    // Round of 32 → Round of 16
+    'k17': { from: ['k1', 'k2'] },
+    'k18': { from: ['k3', 'k4'] },
+    'k19': { from: ['k5', 'k6'] },
+    'k20': { from: ['k7', 'k8'] },
+    'k21': { from: ['k9', 'k10'] },
+    'k22': { from: ['k11', 'k12'] },
+    'k23': { from: ['k13', 'k14'] },
+    'k24': { from: ['k15', 'k16'] },
+    // Round of 16 → Quarter Finals
+    'k25': { from: ['k17', 'k18'] },
+    'k26': { from: ['k19', 'k20'] },
+    'k27': { from: ['k21', 'k22'] },
+    'k28': { from: ['k23', 'k24'] },
+    // Quarter Finals → Semi Finals
+    'k29': { from: ['k25', 'k26'] },
+    'k30': { from: ['k27', 'k28'] },
+    // Semi Finals → Final
+    'k32': { from: ['k29', 'k30'] },
+  };
+
+  // Helper to determine winner of a match
+  const getMatchWinner = (matchId) => {
+    const result = actualResults[matchId];
+    if (!result || result.homeScore === null || result.awayScore === null) {
+      return null;
+    }
+
+    const homeScore = parseInt(result.homeScore);
+    const awayScore = parseInt(result.awayScore);
+
+    // Check for penalty shootout
+    if (homeScore === awayScore) {
+      if (result.homePenaltyScore !== null && result.awayPenaltyScore !== null) {
+        const homePen = parseInt(result.homePenaltyScore);
+        const awayPen = parseInt(result.awayPenaltyScore);
+        if (homePen > awayPen) {
+          return updatedTeams[matchId]?.homeTeam;
+        } else if (awayPen > homePen) {
+          return updatedTeams[matchId]?.awayTeam;
+        }
+      }
+      return null; // Draw without penalties - no winner yet
+    }
+
+    if (homeScore > awayScore) {
+      return updatedTeams[matchId]?.homeTeam;
+    } else {
+      return updatedTeams[matchId]?.awayTeam;
+    }
+  };
+
+  // Process each next match in the bracket
+  Object.keys(bracketStructure).forEach(nextMatchId => {
+    const { from: sourceMatches } = bracketStructure[nextMatchId];
+    
+    // Determine which position (home/away) each source match feeds into
+    // Even index (0) → home, Odd index (1) → away
+    const homeWinner = getMatchWinner(sourceMatches[0]);
+    const awayWinner = getMatchWinner(sourceMatches[1]);
+
+    // Only update if we have winners from both source matches
+    // Or if one source match has a winner and the other is TBD
+    if (homeWinner || awayWinner) {
+      updatedTeams[nextMatchId] = {
+        homeTeam: homeWinner || 'TBD',
+        awayTeam: awayWinner || 'TBD'
+      };
+    }
+  });
+
+  return updatedTeams;
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../../services/firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { allGroupMatchesScored, calculateActualStandings, mapKnockoutTeams, isGroupComplete } from '../../utils/tournamentLogic';
+import { allGroupMatchesScored, calculateActualStandings, mapKnockoutTeams, isGroupComplete, advanceKnockoutWinners } from '../../utils/tournamentLogic';
 
 export default function AdminPanel({ schedule, teams }) {
   const [actualResults, setActualResults] = useState({});
@@ -78,7 +78,21 @@ export default function AdminPanel({ schedule, teams }) {
         matchPicks: actualResults,
         updatedAt: serverTimestamp()
       }, { merge: true });
-      alert('Actual results saved successfully!');
+
+      // Automatically advance knockout winners
+      const advancedTeams = advanceKnockoutWinners(knockoutTeams, actualResults);
+      
+      // Save updated knockout teams to Firestore
+      const knockoutDocRef = doc(db, 'knockoutTeams', 'teams');
+      await setDoc(knockoutDocRef, {
+        teams: advancedTeams,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+
+      // Update local state
+      setKnockoutTeams(advancedTeams);
+
+      alert('Actual results saved successfully! Knockout bracket updated with winners.');
     } catch (error) {
       console.error("Error saving actual results:", error);
       alert('Failed to save results. Please try again.');
