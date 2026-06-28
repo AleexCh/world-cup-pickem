@@ -797,7 +797,7 @@
     "homeTeam": "TBD",
     "awayTeam": "TBD",
     "date": "2026-07-04",
-    "time": "17:00:00Z",
+    "time": "21:00:00Z",
     "stadium": "NRG Stadium"
   },
   {
@@ -806,7 +806,7 @@
     "homeTeam": "TBD",
     "awayTeam": "TBD",
     "date": "2026-07-04",
-    "time": "21:00:00Z",
+    "time": "17:00:00Z",
     "stadium": "Lincoln Financial Field"
   },
   {
@@ -814,8 +814,8 @@
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-05",
-    "time": "20:00:00Z",
+    "date": "2026-07-06",
+    "time": "19:00:00Z",
     "stadium": "MetLife Stadium"
   },
   {
@@ -823,7 +823,7 @@
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-06",
+    "date": "2026-07-07",
     "time": "00:00:00Z",
     "stadium": "Estadio Azteca"
   },
@@ -832,8 +832,8 @@
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-06",
-    "time": "19:00:00Z",
+    "date": "2026-07-05",
+    "time": "20:00:00Z",
     "stadium": "AT&T Stadium"
   },
   {
@@ -841,7 +841,7 @@
     "group": "R16",
     "homeTeam": "TBD",
     "awayTeam": "TBD",
-    "date": "2026-07-07",
+    "date": "2026-07-06",
     "time": "00:00:00Z",
     "stadium": "Lumen Field"
   },
