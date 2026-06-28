@@ -266,12 +266,12 @@ function AppContent() {
   // Filter schedule into group stage and knockout stage
   const groupSchedule = schedule.filter(match => match.group && match.group.match(/^[A-L]$/));
   const knockoutSchedule = schedule.filter(match => match.group && !match.group.match(/^[A-L]$/)).map(match => {
-    // Update knockout teams if available from Firestore and not TBD
-    if (knockoutTeams[match.id] && knockoutTeams[match.id].homeTeam !== 'TBD' && knockoutTeams[match.id].awayTeam !== 'TBD') {
+    // Update knockout teams if available from Firestore (allow partial updates)
+    if (knockoutTeams[match.id]) {
       return {
         ...match,
-        homeTeam: knockoutTeams[match.id].homeTeam,
-        awayTeam: knockoutTeams[match.id].awayTeam
+        homeTeam: knockoutTeams[match.id].homeTeam || match.homeTeam,
+        awayTeam: knockoutTeams[match.id].awayTeam || match.awayTeam
       };
     }
     return match;
@@ -333,6 +333,15 @@ function AppContent() {
         try {
           const results = await fetchActualResults();
           setActualResults(results);
+
+          // Also refresh knockout teams
+          const docRef = doc(db, 'knockoutTeams', 'teams');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            setKnockoutTeams(data.teams || {});
+          }
+
           console.log('Data refreshed on tab visibility');
         } catch (error) {
           console.error("Error refreshing data on tab visibility:", error);

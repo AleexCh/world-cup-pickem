@@ -134,7 +134,7 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
               </div>
             </div>
     
-            {matchCompleted && user && (
+            {matchCompleted && (
               <div className="mt-2 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-2">
                   <span className="text-zinc-500">Actual:</span>
@@ -144,9 +144,12 @@ export default function KnockoutMatches({ schedule, teams, matchPicks, actualRes
                       : `${actualMatch.homeScore} - ${actualMatch.awayScore}`}
                   </span>
                 </div>
-                <div className={`font-bold ${pointsEarned > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
-                  {pointsEarned > 0 ? `+${pointsEarned} pts` : '0 pts'}
-                </div>
+                {/* Only show points if the user is logged in */}
+                {user && (
+                  <div className={`font-bold ${pointsEarned > 0 ? 'text-emerald-400' : 'text-zinc-500'}`}>
+                    {pointsEarned > 0 ? `+${pointsEarned} pts` : '0 pts'}
+                  </div>
+                )}
               </div>
             )}
 

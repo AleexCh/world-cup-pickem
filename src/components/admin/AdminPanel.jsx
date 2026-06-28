@@ -81,7 +81,7 @@ export default function AdminPanel({ schedule, teams }) {
 
       // Automatically advance knockout winners
       const advancedTeams = advanceKnockoutWinners(knockoutTeams, actualResults);
-      
+
       // Save updated knockout teams to Firestore
       const knockoutDocRef = doc(db, 'knockoutTeams', 'teams');
       await setDoc(knockoutDocRef, {
@@ -91,6 +91,19 @@ export default function AdminPanel({ schedule, teams }) {
 
       // Update local state
       setKnockoutTeams(advancedTeams);
+
+      // Update schedule with advanced teams
+      const newSchedule = schedule.map(match => {
+        if (advancedTeams[match.id]) {
+          return {
+            ...match,
+            homeTeam: advancedTeams[match.id].homeTeam,
+            awayTeam: advancedTeams[match.id].awayTeam
+          };
+        }
+        return match;
+      });
+      setUpdatedSchedule(newSchedule);
 
       alert('Actual results saved successfully! Knockout bracket updated with winners.');
     } catch (error) {

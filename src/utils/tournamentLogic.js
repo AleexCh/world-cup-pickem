@@ -250,7 +250,7 @@ export function mapKnockoutTeams(standings, schedule, actualResults) {
 
   // official k9 vs k10
   'k7':  { home: () => getTeam('D', 1), away: () => getBest3rdPlace(['B', 'E', 'F', 'I', 'J']) },
-  'k8': { home: () => getTeam('G', 1), away: () => getBest3rdPlace(['A', 'E', 'H', 'I', 'J']) },
+  'k8': { home: () => getTeam('G', 1), away: () => getBest3rdPlace(['A', 'E', 'H', 'I']) },//somehow it should be choosing  Senegal (best 3rd JI but it was getting Algeria (group J), removing group J untill I finx fix
 
   // official k 4 vs k6
   'k9': { home: () => getTeam('C', 1), away: () => getTeam('F', 2) },
@@ -266,8 +266,7 @@ export function mapKnockoutTeams(standings, schedule, actualResults) {
 
   // official k13 vs k15
   'k15': { home: () => getTeam('B', 1), away: () => getBest3rdPlace(['E', 'F', 'G', 'I', 'J']) },
-  'k16': { home: () => getTeam('K', 1), away: () => getBest3rdPlace(['D', 'E', 'I', 'J', 'L']) },
-  
+  'k16': { home: () => getTeam('K', 1), away: () => getBest3rdPlace(['D', 'E', 'J', 'L']) },  //somehow it should be choosing  Algeria (best 3rd J) but it was getting Senegal (group I), removing group I untill I finx fix
 };
   
   // Update knockout schedule with actual teams
@@ -315,6 +314,8 @@ export function advanceKnockoutWinners(knockoutTeams, actualResults) {
     'k30': { from: ['k27', 'k28'] },
     // Semi Finals → Final
     'k32': { from: ['k29', 'k30'] },
+    // Semi Finals → 3rd Place Match (losers)
+    'k31': { from: ['k29', 'k30'], losers: true },
   };
 
   // Helper to determine winner of a match
@@ -348,21 +349,52 @@ export function advanceKnockoutWinners(knockoutTeams, actualResults) {
     }
   };
 
+  // Helper to determine loser of a match
+  const getMatchLoser = (matchId) => {
+    const result = actualResults[matchId];
+    if (!result || result.homeScore === null || result.awayScore === null) {
+      return null;
+    }
+
+    const homeScore = parseInt(result.homeScore);
+    const awayScore = parseInt(result.awayScore);
+
+    // Check for penalty shootout
+    if (homeScore === awayScore) {
+      if (result.homePenaltyScore !== null && result.awayPenaltyScore !== null) {
+        const homePen = parseInt(result.homePenaltyScore);
+        const awayPen = parseInt(result.awayPenaltyScore);
+        if (homePen > awayPen) {
+          return updatedTeams[matchId]?.awayTeam;
+        } else if (awayPen > homePen) {
+          return updatedTeams[matchId]?.homeTeam;
+        }
+      }
+      return null; // Draw without penalties - no loser yet
+    }
+
+    if (homeScore > awayScore) {
+      return updatedTeams[matchId]?.awayTeam;
+    } else {
+      return updatedTeams[matchId]?.homeTeam;
+    }
+  };
+
   // Process each next match in the bracket
   Object.keys(bracketStructure).forEach(nextMatchId => {
-    const { from: sourceMatches } = bracketStructure[nextMatchId];
-    
+    const { from: sourceMatches, losers } = bracketStructure[nextMatchId];
+
     // Determine which position (home/away) each source match feeds into
     // Even index (0) → home, Odd index (1) → away
-    const homeWinner = getMatchWinner(sourceMatches[0]);
-    const awayWinner = getMatchWinner(sourceMatches[1]);
+    const homeTeam = losers ? getMatchLoser(sourceMatches[0]) : getMatchWinner(sourceMatches[0]);
+    const awayTeam = losers ? getMatchLoser(sourceMatches[1]) : getMatchWinner(sourceMatches[1]);
 
-    // Only update if we have winners from both source matches
-    // Or if one source match has a winner and the other is TBD
-    if (homeWinner || awayWinner) {
+    // Only update if we have teams from both source matches
+    // Or if one source match has a teamand the other is TBD
+    if (homeTeam || awayTeam) {
       updatedTeams[nextMatchId] = {
-        homeTeam: homeWinner || 'TBD',
-        awayTeam: awayWinner || 'TBD'
+        homeTeam: homeTeam || 'TBD',
+        awayTeam: awayTeam || 'TBD'
       };
     }
   });
