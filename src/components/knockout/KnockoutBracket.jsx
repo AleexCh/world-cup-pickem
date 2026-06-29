@@ -370,13 +370,40 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
     const topTeam = match.participants[0];
     const bottomTeam = match.participants[1];
     // Use knockout match scores from admin panel
-    const matchScores = knockoutMatchScores[match.id] || { homeScore: null, awayScore: null };
-    
-    // Determine winner based on scores
+    const matchScores = knockoutMatchScores[match.id] || { homeScore: null, awayScore: null, homePenaltyScore: null, awayPenaltyScore: null };
+
+    // Determine winner based on scores (including penalty shootouts)
     const homeScore = matchScores.homeScore !== null && matchScores.homeScore !== '' ? parseInt(matchScores.homeScore) : null;
     const awayScore = matchScores.awayScore !== null && matchScores.awayScore !== '' ? parseInt(matchScores.awayScore) : null;
-    const topTeamWins = homeScore > awayScore;
-    const bottomTeamWins = awayScore > homeScore;
+    const homePenaltyScore = matchScores.homePenaltyScore !== null && matchScores.homePenaltyScore !== '' ? parseInt(matchScores.homePenaltyScore) : null;
+    const awayPenaltyScore = matchScores.awayPenaltyScore !== null && matchScores.awayPenaltyScore !== '' ? parseInt(matchScores.awayPenaltyScore) : null;
+
+    let topTeamWins = false;
+    let bottomTeamWins = false;
+
+    if (homeScore !== null && awayScore !== null) {
+      if (homeScore > awayScore) {
+        topTeamWins = true;
+      } else if (awayScore > homeScore) {
+        bottomTeamWins = true;
+      } else if (homeScore === awayScore && homePenaltyScore !== null && awayPenaltyScore !== null) {
+        // Penalty shootout decides winner
+        if (homePenaltyScore > awayPenaltyScore) {
+          topTeamWins = true;
+        } else if (awayPenaltyScore > homePenaltyScore) {
+          bottomTeamWins = true;
+        }
+      }
+    }
+
+    // Format score display with penalty shootout if applicable
+    const formatScore = (score, penaltyScore) => {
+      if (score === null || score === '') return '-';
+      if (penaltyScore !== null && penaltyScore !== '' && penaltyScore !== undefined) {
+        return `${score} (${penaltyScore})`;
+      }
+      return score;
+    };
 
     return (
       <MatchWrapper>
@@ -393,7 +420,7 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
         >
           <div className="flex items-center justify-between w-full">
             <span className="flex-1">{topTeam.resultText}</span>
-            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.homeScore !== null && matchScores.homeScore !== '' ? matchScores.homeScore : '-'}</span>
+            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{formatScore(matchScores.homeScore, matchScores.homePenaltyScore)}</span>
           </div>
         </Participant>
         <Participant
@@ -409,7 +436,7 @@ export default function KnockoutBracket({ knockoutPicks, setKnockoutPicks, teams
         >
           <div className="flex items-center justify-between w-full">
             <span className="flex-1">{bottomTeam.resultText}</span>
-            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{matchScores.awayScore !== null && matchScores.awayScore !== '' ? matchScores.awayScore : '-'}</span>
+            <span className="w-6 h-5 text-center text-zinc-500 text-xs font-bold ml-2">{formatScore(matchScores.awayScore, matchScores.awayPenaltyScore)}</span>
           </div>
         </Participant>
       </MatchWrapper>
